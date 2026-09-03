@@ -6,6 +6,8 @@ const navigationItems = [
   { to: "/my-learning", label: "My Learning" },
   { to: "/progress", label: "Progress" },
   { to: "/profile", label: "Profile" },
+  { to: "/login", label: "Login" },
+  { to: "/signup", label: "Sign Up" },
 ];
 
 function Navbar() {

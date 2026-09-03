@@ -240,6 +240,10 @@
   color: var(--danger);
 }
 
+.login-form-error {
+  text-align: center;
+}
+
 /* ---------- responsive + reduced motion ---------- */
 
 @media (max-width: 480px) {

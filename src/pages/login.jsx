@@ -8,7 +8,7 @@ function Login() {
   const [errors, setErrors] = useState({});
   const navigate = useNavigate();
 
- const validateForm = () => {
+  const validateForm = () => {
     const newErrors = {};
 
     if (!email.trim()) {
@@ -23,6 +23,14 @@ function Login() {
       newErrors.password = "Password must be at least 6 characters.";
     }
 
+    if (
+      Object.keys(newErrors).length === 0 &&
+      (email.trim().toLowerCase() !== "student@gmail.com" ||
+        password !== "student 123")
+    ) {
+      newErrors.credentials = "Invalid email or password.";
+    }
+
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
@@ -31,7 +39,11 @@ function Login() {
     event.preventDefault();
 
     if (validateForm()) {
-      navigate("/dashboard");
+      localStorage.setItem(
+        "studyflowAuth",
+        JSON.stringify({ email: "student@gmail.com", isLoggedIn: true }),
+      );
+      navigate("/", { replace: true });
     }
   };
   return (
@@ -69,6 +81,12 @@ function Login() {
           <button type="submit" className="login-button">
             Login
           </button>
+
+          {errors.credentials && (
+            <p className="error-message login-form-error" role="alert">
+              {errors.credentials}
+            </p>
+          )}
         </form>
 
         <p className="login-footer">
