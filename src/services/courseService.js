@@ -5,3 +5,7 @@ export function getCourses() {
     setTimeout(() => resolve(courses), 500);
   });
 }
+
+export function getCourseById(courseId) {
+  return courses.find((course) => course.id === courseId);
+}

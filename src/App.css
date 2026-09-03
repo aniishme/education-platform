@@ -268,12 +268,232 @@
   }
 }
 
+/* ---------- course details ---------- */
+
+.back-link {
+  display: inline-flex;
+  margin-bottom: 22px;
+  gap: 7px;
+  color: var(--accent);
+  font-size: 14px;
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.back-link:hover {
+  text-decoration: underline;
+}
+
+.back-link:focus-visible,
+.enrol-button:focus-visible {
+  outline: 3px solid rgba(79, 70, 229, 0.35);
+  outline-offset: 3px;
+}
+
+.course-details-hero {
+  padding: clamp(30px, 5vw, 54px);
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(250px, 0.42fr);
+  align-items: start;
+  gap: clamp(30px, 6vw, 72px);
+  background: var(--paper);
+  border: 1px solid #e1e6ef;
+  border-radius: 14px 14px 0 0;
+}
+
+.course-details-hero h1 {
+  max-width: 720px;
+  margin: 10px 0 16px;
+  font-family: "Fraunces", Georgia, serif;
+  font-size: clamp(38px, 6vw, 60px);
+  line-height: 1.08;
+  letter-spacing: -0.03em;
+}
+
+.course-details-description {
+  max-width: 680px;
+  color: var(--text-soft);
+  font-size: 17px;
+  line-height: 1.7;
+}
+
+.enrol-card {
+  padding: 24px;
+  border: 1px solid #e5ded2;
+  border-radius: 12px;
+  background: #fffaf2;
+}
+
+.enrol-card-label {
+  margin-bottom: 8px;
+  color: var(--text);
+  font-family: "Fraunces", Georgia, serif;
+  font-size: 22px;
+  font-weight: 600;
+}
+
+.enrol-card > p:not(.enrol-card-label):not(.enrol-confirmation) {
+  margin-bottom: 18px;
+  color: var(--text-soft);
+  font-size: 14px;
+  line-height: 1.55;
+}
+
+.enrol-button {
+  width: 100%;
+  padding: 13px 18px;
+  border: 0;
+  border-radius: 9px;
+  background: var(--accent);
+  color: #ffffff;
+  font-weight: 600;
+  cursor: pointer;
+  box-shadow: 0 6px 16px -6px rgba(79, 70, 229, 0.55);
+}
+
+.enrol-button:hover:not(:disabled) {
+  background: var(--accent-dark);
+}
+
+.enrol-button:disabled {
+  background: #6f6aae;
+  cursor: default;
+  box-shadow: none;
+}
+
+.enrol-confirmation {
+  margin-top: 12px;
+  color: #287052;
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 1.45;
+}
+
+.details-meta {
+  padding: 24px clamp(30px, 5vw, 54px);
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 20px;
+  background: #fbfcfe;
+  border: solid #e1e6ef;
+  border-width: 0 1px 1px;
+  border-radius: 0 0 14px 14px;
+}
+
+.details-meta div {
+  padding-left: 16px;
+  border-left: 3px solid rgba(180, 83, 9, 0.28);
+}
+
+.details-meta dt {
+  margin-bottom: 5px;
+  color: var(--text-soft);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.details-meta dd {
+  margin: 0;
+  font-weight: 600;
+}
+
+.lesson-section {
+  margin-top: 48px;
+}
+
+.lesson-count {
+  color: var(--text-soft);
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.lesson-list {
+  list-style: none;
+  counter-reset: lessons;
+  background: var(--paper);
+  border: 1px solid #e1e6ef;
+  border-radius: 14px;
+  overflow: hidden;
+}
+
+.lesson-list li {
+  counter-increment: lessons;
+  padding: 20px 24px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+}
+
+.lesson-list li + li {
+  border-top: 1px solid #e8ebf1;
+}
+
+.lesson-list li > div {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  font-weight: 600;
+}
+
+.lesson-number::before {
+  content: counter(lessons, decimal-leading-zero);
+  color: var(--brand);
+  font-family: "Fraunces", Georgia, serif;
+  font-size: 18px;
+}
+
+.lesson-duration {
+  flex-shrink: 0;
+  color: var(--text-soft);
+  font-size: 13px;
+}
+
+.course-not-found h1 {
+  margin: 8px 0 10px;
+  font-family: "Fraunces", Georgia, serif;
+  font-size: clamp(32px, 5vw, 44px);
+}
+
+.course-not-found > p:not(.eyebrow) {
+  margin-bottom: 24px;
+}
+
+@media (max-width: 760px) {
+  .course-details-hero {
+    grid-template-columns: 1fr;
+  }
+
+  .details-meta {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .lesson-list li {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .lesson-duration {
+    padding-left: 39px;
+  }
+}
+
+@media (max-width: 420px) {
+  .details-meta {
+    grid-template-columns: 1fr;
+  }
+}
+
 /* ---------- main application ---------- */
 
 .app-shell {
   min-height: 100vh;
   color: var(--text);
   background: #f3f6fb;
+  font-family: "Inter", Arial, sans-serif;
 }
 
 .site-header {
