@@ -1,0 +1,158 @@
+[
+  {
+    "id": "react-fundamentals",
+    "title": "React Fundamentals",
+    "description": "Learn how to build interactive user interfaces with reusable React components, props, state, and events.",
+    "category": "Web Development",
+    "instructor": "Sarah Lee",
+    "level": "Beginner",
+    "duration": "6 hours",
+    "totalLessons": 5,
+    "lessons": [
+      { "id": "react-lesson-1", "title": "Introduction to React", "duration": "25 minutes" },
+      { "id": "react-lesson-2", "title": "Components and JSX", "duration": "40 minutes" },
+      { "id": "react-lesson-3", "title": "Working with Props", "duration": "35 minutes" },
+      { "id": "react-lesson-4", "title": "Managing State", "duration": "45 minutes" },
+      { "id": "react-lesson-5", "title": "Events and Forms", "duration": "50 minutes" }
+    ]
+  },
+  {
+    "id": "cybersecurity-essentials",
+    "title": "Cybersecurity Essentials",
+    "description": "Understand common online threats and learn practical techniques for protecting devices, accounts, and information.",
+    "category": "Cybersecurity",
+    "instructor": "Daniel Morgan",
+    "level": "Beginner",
+    "duration": "5 hours",
+    "totalLessons": 5,
+    "lessons": [
+      { "id": "cyber-lesson-1", "title": "The Modern Threat Landscape", "duration": "30 minutes" },
+      { "id": "cyber-lesson-2", "title": "Passwords and Authentication", "duration": "35 minutes" },
+      { "id": "cyber-lesson-3", "title": "Phishing and Social Engineering", "duration": "40 minutes" },
+      { "id": "cyber-lesson-4", "title": "Safe Browsing and Networks", "duration": "35 minutes" },
+      { "id": "cyber-lesson-5", "title": "Responding to an Incident", "duration": "45 minutes" }
+    ]
+  },
+  {
+    "id": "cloud-computing-foundations",
+    "title": "Cloud Computing Foundations",
+    "description": "Explore cloud service models, deployment options, virtual resources, and the basics of designing cloud solutions.",
+    "category": "Cloud Computing",
+    "instructor": "Priya Sharma",
+    "level": "Beginner",
+    "duration": "7 hours",
+    "totalLessons": 5,
+    "lessons": [
+      { "id": "cloud-lesson-1", "title": "What Is Cloud Computing?", "duration": "30 minutes" },
+      { "id": "cloud-lesson-2", "title": "Cloud Service Models", "duration": "40 minutes" },
+      { "id": "cloud-lesson-3", "title": "Public, Private, and Hybrid Cloud", "duration": "35 minutes" },
+      { "id": "cloud-lesson-4", "title": "Compute, Storage, and Networking", "duration": "50 minutes" },
+      { "id": "cloud-lesson-5", "title": "Cloud Security and Costs", "duration": "45 minutes" }
+    ]
+  },
+  {
+    "id": "python-programming",
+    "title": "Python Programming",
+    "description": "Develop core programming skills with Python through variables, decisions, loops, functions, and simple projects.",
+    "category": "Programming",
+    "instructor": "Michael Chen",
+    "level": "Beginner",
+    "duration": "8 hours",
+    "totalLessons": 6,
+    "lessons": [
+      { "id": "python-lesson-1", "title": "Python Setup and Syntax", "duration": "35 minutes" },
+      { "id": "python-lesson-2", "title": "Variables and Data Types", "duration": "45 minutes" },
+      { "id": "python-lesson-3", "title": "Conditions and Loops", "duration": "55 minutes" },
+      { "id": "python-lesson-4", "title": "Functions", "duration": "50 minutes" },
+      { "id": "python-lesson-5", "title": "Lists and Dictionaries", "duration": "55 minutes" },
+      { "id": "python-lesson-6", "title": "Build a Small Program", "duration": "60 minutes" }
+    ]
+  },
+  {
+    "id": "networking-basics",
+    "title": "Networking Basics",
+    "description": "Discover how computer networks communicate using common devices, protocols, addressing, and troubleshooting tools.",
+    "category": "Networking",
+    "instructor": "Olivia Brown",
+    "level": "Intermediate",
+    "duration": "6.5 hours",
+    "totalLessons": 5,
+    "lessons": [
+      { "id": "network-lesson-1", "title": "Network Types and Topologies", "duration": "40 minutes" },
+      { "id": "network-lesson-2", "title": "The OSI and TCP/IP Models", "duration": "50 minutes" },
+      { "id": "network-lesson-3", "title": "IP Addressing", "duration": "55 minutes" },
+      { "id": "network-lesson-4", "title": "Switches and Routers", "duration": "45 minutes" },
+      { "id": "network-lesson-5", "title": "Basic Network Troubleshooting", "duration": "50 minutes" }
+    ]
+  },
+  {
+    "id": "sql-database-design",
+    "title": "SQL and Database Design",
+    "description": "Design clear relational databases and use SQL to create, retrieve, update, and organise structured data.",
+    "category": "Database",
+    "instructor": "Ahmed Hassan",
+    "level": "Intermediate",
+    "duration": "7.5 hours",
+    "totalLessons": 6,
+    "lessons": [
+      { "id": "sql-lesson-1", "title": "Relational Database Concepts", "duration": "35 minutes" },
+      { "id": "sql-lesson-2", "title": "Tables, Keys, and Relationships", "duration": "50 minutes" },
+      { "id": "sql-lesson-3", "title": "Selecting and Filtering Data", "duration": "55 minutes" },
+      { "id": "sql-lesson-4", "title": "Joins and Aggregates", "duration": "60 minutes" },
+      { "id": "sql-lesson-5", "title": "Inserting and Updating Data", "duration": "45 minutes" },
+      { "id": "sql-lesson-6", "title": "Normalisation Basics", "duration": "50 minutes" }
+    ]
+  },
+  {
+    "id": "ui-ux-design-basics",
+    "title": "UI/UX Design Basics",
+    "description": "Plan useful digital experiences with user research, simple wireframes, visual hierarchy, and accessible design choices.",
+    "category": "UI/UX",
+    "instructor": "Emma Wilson",
+    "level": "Beginner",
+    "duration": "5.5 hours",
+    "totalLessons": 5,
+    "lessons": [
+      { "id": "design-lesson-1", "title": "UI and UX Principles", "duration": "30 minutes" },
+      { "id": "design-lesson-2", "title": "Understanding Your Users", "duration": "40 minutes" },
+      { "id": "design-lesson-3", "title": "Sketching and Wireframing", "duration": "45 minutes" },
+      { "id": "design-lesson-4", "title": "Typography, Colour, and Layout", "duration": "50 minutes" },
+      { "id": "design-lesson-5", "title": "Usability and Accessibility", "duration": "45 minutes" }
+    ]
+  },
+  {
+    "id": "agile-project-management",
+    "title": "Agile Project Management",
+    "description": "Learn how Agile teams plan work, collaborate, review progress, and adapt projects through short delivery cycles.",
+    "category": "Project Management",
+    "instructor": "James Taylor",
+    "level": "Intermediate",
+    "duration": "6 hours",
+    "totalLessons": 5,
+    "lessons": [
+      { "id": "agile-lesson-1", "title": "Agile Values and Principles", "duration": "35 minutes" },
+      { "id": "agile-lesson-2", "title": "Scrum Roles and Events", "duration": "45 minutes" },
+      { "id": "agile-lesson-3", "title": "Writing and Prioritising User Stories", "duration": "50 minutes" },
+      { "id": "agile-lesson-4", "title": "Planning a Sprint", "duration": "45 minutes" },
+      { "id": "agile-lesson-5", "title": "Reviews and Retrospectives", "duration": "40 minutes" }
+    ]
+  },
+  {
+    "id": "advanced-javascript",
+    "title": "Advanced JavaScript",
+    "description": "Strengthen your JavaScript knowledge with closures, asynchronous code, modules, and modern language patterns.",
+    "category": "Web Development",
+    "instructor": "Sofia Martinez",
+    "level": "Advanced",
+    "duration": "9 hours",
+    "totalLessons": 6,
+    "lessons": [
+      { "id": "javascript-lesson-1", "title": "Scope and Closures", "duration": "55 minutes" },
+      { "id": "javascript-lesson-2", "title": "The Event Loop", "duration": "50 minutes" },
+      { "id": "javascript-lesson-3", "title": "Promises and Async/Await", "duration": "60 minutes" },
+      { "id": "javascript-lesson-4", "title": "Modules and Code Organisation", "duration": "50 minutes" },
+      { "id": "javascript-lesson-5", "title": "Objects and Prototypes", "duration": "60 minutes" },
+      { "id": "javascript-lesson-6", "title": "Performance and Debugging", "duration": "55 minutes" }
+    ]
+  }
+]
