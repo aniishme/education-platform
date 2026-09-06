@@ -2,8 +2,8 @@ import { useState } from "react";
 import "../Profile.css";
 
 const defaultProfile = {
-  name: "Sameera",
-  email: "cihe251109@student.cihe.edu.au",
+  name: "Student 1",
+  email: "student@gmail.com",
   studentId: "CIHE251109",
   course: "Advanced Web Application Development",
   memberSince: "September 2024",
