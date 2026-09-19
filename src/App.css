@@ -494,6 +494,8 @@
 /* ---------- main application ---------- */
 
 .app-shell {
+  display: flex;
+  flex-direction: column;
   min-height: 100vh;
   color: var(--text);
   background: #f3f6fb;
