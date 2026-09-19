@@ -1,11 +1,25 @@
-import { useState } from "react";
-import { Link, useParams } from "react-router-dom";
+import { useEffect, useRef, useState } from "react";
+import { Link, useParams, useSearchParams } from "react-router-dom";
 import { getCourseById } from "../services/courseService";
 
 function CourseDetails() {
   const { id } = useParams();
   const course = getCourseById(id);
   const [isEnrolled, setIsEnrolled] = useState(false);
+  const resumeRef = useRef(null);
+
+  // ?lesson=<id> comes from "Resume lesson" on the dashboard
+  const [searchParams] = useSearchParams();
+  const resumeLessonId = searchParams.get("lesson");
+  const resumeIndex = course?.lessons.findIndex((lesson) => lesson.id === resumeLessonId) ?? -1;
+
+  useEffect(() => {
+    if (resumeIndex === -1) return undefined;
+
+    // wait a frame: the layout's scroll-to-top on navigation runs after this effect
+    const frame = requestAnimationFrame(() => resumeRef.current?.scrollIntoView({ block: "center" }));
+    return () => cancelAnimationFrame(frame);
+  }, [resumeIndex]);
 
   if (!course) {
     return (
@@ -81,15 +95,27 @@ function CourseDetails() {
         </div>
 
         <ol className="lesson-list">
-          {course.lessons.map((lesson) => (
-            <li key={lesson.id}>
-              <div>
-                <span className="lesson-number" aria-hidden="true" />
-                <span>{lesson.title}</span>
-              </div>
-              <span className="lesson-duration">{lesson.duration}</span>
-            </li>
-          ))}
+          {course.lessons.map((lesson, index) => {
+            const isCurrent = index === resumeIndex;
+            const isDone = resumeIndex !== -1 && index < resumeIndex;
+
+            return (
+              <li
+                key={lesson.id}
+                ref={isCurrent ? resumeRef : null}
+                className={isCurrent ? "lesson-current" : isDone ? "lesson-done" : undefined}
+                aria-current={isCurrent ? "step" : undefined}
+              >
+                <div>
+                  <span className="lesson-number" aria-hidden="true" />
+                  <span>{lesson.title}</span>
+                  {isCurrent && <span className="lesson-resume-badge">Continue here</span>}
+                  {isDone && <span className="visually-hidden">Completed</span>}
+                </div>
+                <span className="lesson-duration">{lesson.duration}</span>
+              </li>
+            );
+          })}
         </ol>
       </section>
     </article>

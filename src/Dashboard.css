@@ -1,0 +1,542 @@
+/* Home for logged-in learners: greeting, resume card, streak, weekly chart, deadlines */
+
+.dashboard-heading {
+  max-width: 680px;
+  margin-bottom: 30px;
+}
+
+.dashboard-heading h1 {
+  margin: 8px 0 12px;
+  font-family: "Fraunces", Georgia, serif;
+  font-size: clamp(2.375rem, 5vw, 3.25rem);
+  letter-spacing: -0.025em;
+}
+
+.dashboard-heading > p:last-child {
+  color: var(--text-soft);
+  font-size: 1rem;
+  line-height: 1.65;
+}
+
+.dashboard-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.6fr) minmax(260px, 0.9fr);
+  gap: 20px;
+  align-items: stretch;
+}
+
+.dash-card {
+  padding: 28px;
+  background: var(--paper);
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  box-shadow: 0 16px 36px -28px rgba(var(--shadow), 0.45);
+}
+
+/* small orange label + serif title + grey copy: the same card pattern as Profile, Progress and My Learning */
+.dash-kicker {
+  margin-bottom: 7px;
+  color: var(--brand);
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.dash-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 4px;
+}
+
+.dash-title {
+  margin-bottom: 10px;
+  font-family: "Fraunces", Georgia, serif;
+  font-size: 1.5625rem;
+}
+
+.dash-copy {
+  color: var(--text-soft);
+  line-height: 1.6;
+}
+
+/* stat numbers: serif, orange, grey label beneath (as on My Learning) */
+.dash-stats {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 16px;
+  margin: 18px 0 26px;
+}
+
+.dash-stats.single {
+  grid-template-columns: minmax(0, 1fr);
+  width: fit-content;
+  margin: 22px 0 0;
+}
+
+.dash-stats > div {
+  display: flex;
+  flex-direction: column-reverse;
+  gap: 4px;
+  padding-left: 14px;
+  border-left: 3px solid rgba(180, 83, 9, 0.28);
+}
+
+.dash-stats dt {
+  color: var(--text-soft);
+  font-size: 0.8125rem;
+  font-weight: 600;
+}
+
+.dash-stats dd {
+  color: var(--brand);
+  font-family: "Fraunces", Georgia, serif;
+  font-size: 1.75rem;
+  line-height: 1.15;
+}
+
+/* ---------- continue where you left off ---------- */
+
+.continue-card {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+/* one segment per lesson: done, current, still to come */
+.lesson-steps {
+  display: flex;
+  gap: 6px;
+  width: 100%;
+  max-width: 360px;
+  margin: 20px 0 24px;
+  list-style: none;
+}
+
+.lesson-steps li {
+  flex: 1;
+  height: 8px;
+  border-radius: 999px;
+  background: var(--track);
+}
+
+.lesson-steps li.done {
+  background: var(--accent);
+}
+
+.lesson-steps li.current {
+  background: var(--accent);
+  box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.25);
+}
+
+.continue-card .primary-button {
+  margin-top: auto;
+}
+
+/* ---------- streak ---------- */
+
+.streak-days {
+  display: flex;
+  gap: 8px;
+  margin-top: 18px;
+  list-style: none;
+}
+
+.streak-days li {
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: var(--track);
+}
+
+.streak-days li.studied {
+  background: var(--accent);
+}
+
+/* ---------- weekly activity chart ---------- */
+
+.activity {
+  --plot-height: 200px;
+}
+
+.activity-toggle {
+  flex-shrink: 0;
+  padding: 7px 12px;
+  border: 1px solid var(--line-field);
+  border-radius: 8px;
+  background: var(--paper);
+  color: var(--text);
+  font-size: 0.8125rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.activity-toggle:hover {
+  background: var(--bg);
+}
+
+.activity-chart {
+  position: relative;
+  padding-left: 40px;
+}
+
+.activity-gridlines {
+  position: absolute;
+  top: 0;
+  right: 0;
+  left: 40px;
+  height: var(--plot-height);
+}
+
+.activity-gridline {
+  position: absolute;
+  right: 0;
+  left: 0;
+  height: 0;
+  border-top: 1px solid var(--line-soft);
+}
+
+.activity-gridline.baseline {
+  border-top-color: var(--line-strong);
+}
+
+.activity-gridline span {
+  position: absolute;
+  top: -0.6em;
+  left: -40px;
+  width: 32px;
+  color: var(--text-soft);
+  font-size: 0.75rem;
+  line-height: 1.2;
+  text-align: right;
+}
+
+.activity-columns {
+  position: relative;
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  gap: 4px;
+}
+
+.activity-col {
+  padding-bottom: 8px;
+  border-radius: 10px;
+  transition: background 0.15s ease;
+}
+
+.activity-col:hover,
+.activity-col:focus-visible {
+  background: rgba(79, 70, 229, 0.07);
+}
+
+.activity-col:focus-visible {
+  outline: 3px solid var(--focus-ring);
+  outline-offset: 2px;
+}
+
+.activity-bar-area {
+  position: relative;
+  height: var(--plot-height);
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+}
+
+/* thin bar, rounded at the top, square where it meets the baseline;
+   earlier days are a lighter step of the accent, today is the full accent */
+.activity-bar {
+  width: min(24px, 60%);
+  border-radius: 4px 4px 0 0;
+  background: var(--accent);
+  background: color-mix(in srgb, var(--accent) 70%, var(--paper));
+  transition: background 0.15s ease;
+}
+
+.activity-col.today .activity-bar,
+.activity-col:hover .activity-bar,
+.activity-col:focus-visible .activity-bar {
+  background: var(--accent);
+}
+
+.activity-rest {
+  width: min(24px, 60%);
+  height: 4px;
+  border-radius: 2px;
+  background: var(--line-strong);
+}
+
+.activity-value {
+  position: absolute;
+  left: 50%;
+  translate: -50% 0;
+  color: var(--text);
+  font-size: 0.75rem;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.activity-tip {
+  position: absolute;
+  left: 50%;
+  z-index: 2;
+  display: none;
+  flex-direction: column;
+  gap: 2px;
+  padding: 8px 12px;
+  translate: -50% 0;
+  background: var(--paper);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  box-shadow: 0 10px 24px -12px rgba(var(--shadow), 0.55);
+  pointer-events: none;
+  white-space: nowrap;
+}
+
+.activity-tip strong {
+  color: var(--text);
+  font-size: 0.875rem;
+  font-weight: 600;
+}
+
+.activity-tip span {
+  color: var(--text-soft);
+  font-size: 0.75rem;
+}
+
+.activity-col:hover .activity-tip,
+.activity-col:focus-visible .activity-tip {
+  display: flex;
+}
+
+.activity-day {
+  display: block;
+  margin-top: 10px;
+  color: var(--text-soft);
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-align: center;
+}
+
+.activity-day.today {
+  color: var(--accent);
+}
+
+.activity-table-wrap {
+  overflow: hidden;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+}
+
+.activity-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.9375rem;
+}
+
+.activity-table th,
+.activity-table td {
+  padding: 12px 16px;
+  text-align: left;
+  vertical-align: middle;
+}
+
+.activity-table thead th {
+  background: var(--bg);
+  border-bottom: 1px solid var(--line);
+  color: var(--text-soft);
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.activity-table tbody tr + tr th,
+.activity-table tbody tr + tr td {
+  border-top: 1px solid var(--line-soft);
+}
+
+.activity-table tbody tr:hover {
+  background: rgba(79, 70, 229, 0.05);
+}
+
+.activity-table tbody tr.today {
+  background: rgba(79, 70, 229, 0.08);
+}
+
+.activity-table tbody th {
+  font-weight: 400;
+}
+
+.table-day {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--text);
+  font-weight: 600;
+}
+
+.table-today {
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: var(--accent);
+  color: #ffffff;
+  font-size: 0.6875rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.table-date {
+  display: block;
+  margin-top: 1px;
+  color: var(--text-soft);
+  font-size: 0.8125rem;
+}
+
+.table-time {
+  color: var(--text);
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.table-time.none {
+  color: var(--text-soft);
+  font-weight: 500;
+}
+
+/* a small bar per row, on the same scale as the chart */
+.table-share {
+  width: 34%;
+}
+
+.table-share-track {
+  display: block;
+  height: 8px;
+  overflow: hidden;
+  border-radius: 999px;
+  background: var(--track);
+}
+
+.table-share-track span {
+  display: block;
+  height: 100%;
+  border-radius: 999px;
+  background: var(--accent);
+}
+
+.activity-table tfoot th,
+.activity-table tfoot td {
+  background: var(--bg);
+  border-top: 1px solid var(--line);
+  color: var(--text);
+  font-weight: 600;
+}
+
+/* ---------- upcoming deadlines ---------- */
+
+.deadline-list {
+  display: grid;
+  gap: 16px;
+  list-style: none;
+}
+
+.deadline-list li {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: 6px 14px;
+  align-items: center;
+}
+
+.deadline-date {
+  display: grid;
+  place-items: center;
+  width: 52px;
+  padding: 6px 0;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: var(--field);
+  line-height: 1.15;
+}
+
+.deadline-date span {
+  color: var(--brand);
+  font-size: 0.6875rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.deadline-date strong {
+  color: var(--text);
+  font-size: 1.125rem;
+  font-weight: 600;
+}
+
+.deadline-body a {
+  color: var(--text);
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.deadline-body a:hover {
+  color: var(--accent);
+  text-decoration: underline;
+}
+
+.deadline-body {
+  display: grid;
+  gap: 2px;
+}
+
+.deadline-body span {
+  color: var(--text-soft);
+  font-size: 0.8125rem;
+}
+
+/* the due label always carries text, so urgency never relies on colour alone */
+.deadline-due {
+  grid-column: 2;
+  width: fit-content;
+  padding: 3px 10px;
+  border-radius: 999px;
+  background: var(--track);
+  color: var(--text);
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+.deadline-due.urgent {
+  background: var(--warm-chip);
+  color: var(--brand);
+}
+
+@media (max-width: 860px) {
+  .dashboard-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 720px) {
+  .dash-card {
+    padding: 22px;
+  }
+
+  .dash-stats {
+    grid-template-columns: 1fr;
+  }
+
+  .activity-gridline span {
+    left: -36px;
+  }
+
+  .activity-chart {
+    padding-left: 36px;
+  }
+
+  .activity-gridlines {
+    left: 36px;
+  }
+}

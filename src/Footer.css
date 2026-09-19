@@ -1,7 +1,7 @@
 .site-footer {
   margin-top: auto;
-  background: rgba(255, 255, 255, 0.96);
-  border-top: 1px solid #e1e6ef;
+  background: var(--header-bg);
+  border-top: 1px solid var(--line);
 }
 
 .footer-inner {
@@ -17,7 +17,7 @@
 .footer-copy {
   margin: 0;
   color: var(--text-soft);
-  font-size: 14px;
+  font-size: 0.875rem;
 }
 
 .footer-links {
@@ -30,7 +30,7 @@
   padding: 9px 12px;
   border-radius: 8px;
   color: var(--text-soft);
-  font-size: 14px;
+  font-size: 0.875rem;
   font-weight: 600;
   text-decoration: none;
 }

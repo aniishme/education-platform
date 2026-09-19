@@ -1,6 +1,12 @@
 import { useState } from "react";
 import { NavLink, useNavigate } from "react-router-dom";
+import logo from "../assets/studyflow-favicon.svg";
 import { isLoggedIn, logout } from "../utils/auth";
+import NavSearch from "./NavSearch";
+import NotificationMenu from "./NotificationMenu";
+import ThemeToggle from "./ThemeToggle";
+import UserMenu from "./UserMenu";
+import "../Navbar.css";
 
 const guestNavItems = [
   { to: "/", label: "Home", end: true },
@@ -12,7 +18,6 @@ const memberNavItems = [
   { to: "/courses", label: "Courses" },
   { to: "/my-learning", label: "My Learning" },
   { to: "/progress", label: "Progress" },
-  { to: "/profile", label: "Profile" },
 ];
 
 function Navbar() {
@@ -31,10 +36,11 @@ function Navbar() {
     <header className="site-header">
       <nav className="navbar" aria-label="Main navigation">
         <NavLink className="navbar-brand" to="/">
+          <img className="navbar-logo" src={logo} alt="" />
           StudyFlow
         </NavLink>
 
-        <div className="navbar-links">
+        <div className={`navbar-links${authed ? " navbar-links-member" : ""}`}>
           {navigationItems.map((item) => (
             <NavLink
               key={item.to}
@@ -48,11 +54,7 @@ function Navbar() {
             </NavLink>
           ))}
 
-          {authed ? (
-            <button type="button" className="nav-link nav-link-button" onClick={handleLogout}>
-              Logout
-            </button>
-          ) : (
+          {!authed && (
             <>
               <NavLink
                 to="/login"
@@ -69,6 +71,15 @@ function Navbar() {
             </>
           )}
         </div>
+
+        {authed && (
+          <div className="navbar-tools">
+            <NavSearch />
+            <ThemeToggle />
+            <NotificationMenu />
+            <UserMenu onLogout={handleLogout} />
+          </div>
+        )}
       </nav>
     </header>
   );

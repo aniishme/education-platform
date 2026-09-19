@@ -10,20 +10,20 @@
 .info-heading h1 {
   margin: 8px 0 12px;
   font-family: "Fraunces", Georgia, serif;
-  font-size: clamp(38px, 5vw, 52px);
+  font-size: clamp(2.375rem, 5vw, 3.25rem);
   letter-spacing: -0.025em;
 }
 
 .info-heading > p:last-child {
   color: var(--text-soft);
-  font-size: 16px;
+  font-size: 1rem;
   line-height: 1.65;
 }
 
 .info-card {
   padding: 28px;
   background: var(--paper);
-  border: 1px solid #e1e6ef;
+  border: 1px solid var(--line);
   border-radius: 14px;
   box-shadow: 0 16px 36px -28px rgba(var(--shadow), 0.45);
 }
@@ -31,14 +31,14 @@
 .info-card h2 {
   margin: 0 0 10px;
   font-family: "Fraunces", Georgia, serif;
-  font-size: 22px;
+  font-size: 1.5625rem;
   font-weight: 600;
 }
 
 .info-card p {
   margin: 0;
   color: var(--text-soft);
-  line-height: 1.7;
+  line-height: 1.6;
 }
 
 .info-card a {
@@ -71,7 +71,7 @@
   margin-top: 20px;
   padding: 28px;
   background: var(--paper);
-  border: 1px solid #e1e6ef;
+  border: 1px solid var(--line);
   border-radius: 14px;
   box-shadow: 0 16px 36px -28px rgba(var(--shadow), 0.45);
 }
@@ -79,7 +79,7 @@
 .info-cta h2 {
   margin: 0 0 6px;
   font-family: "Fraunces", Georgia, serif;
-  font-size: 24px;
+  font-size: 1.5625rem;
   font-weight: 600;
 }
 
@@ -95,7 +95,7 @@
   border-radius: 9px;
   background: var(--accent);
   color: white;
-  font-size: 15px;
+  font-size: 0.9375rem;
   font-weight: 600;
   text-decoration: none;
   box-shadow: 0 6px 16px -6px rgba(79, 70, 229, 0.55);
@@ -125,25 +125,23 @@
   width: 100%;
   box-sizing: border-box;
   padding: 12px 14px;
-  border: 1px solid #d6dbe6;
+  border: 1px solid var(--line-field);
   border-radius: 9px;
-  background: #fbfcfe;
+  background: var(--field);
   font-family: inherit;
-  font-size: 16px;
+  font-size: 1rem;
   color: var(--text);
   resize: vertical;
   transition: border-color 0.15s ease, box-shadow 0.15s ease, background 0.15s ease;
 }
 
 .contact-form .form-group textarea::placeholder {
-  color: #9aa3b8;
+  color: var(--placeholder);
 }
 
 .contact-form .form-group textarea:focus {
-  outline: none;
   background: var(--paper);
-  border-color: var(--accent);
-  box-shadow: 0 0 0 4px rgba(79, 70, 229, 0.14);
+  border-color: var(--focus-ring);
 }
 
 .contact-success {
@@ -151,8 +149,8 @@
   padding: 12px 14px;
   border-radius: 9px;
   background: rgba(22, 163, 74, 0.1);
-  color: #15803d !important;
-  font-size: 14px;
+  color: var(--success-text) !important;
+  font-size: 0.875rem;
   font-weight: 600;
 }
 
@@ -163,7 +161,7 @@
 .contact-details dt {
   margin-top: 16px;
   color: var(--text);
-  font-size: 14px;
+  font-size: 0.875rem;
   font-weight: 600;
 }
 

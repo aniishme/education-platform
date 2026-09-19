@@ -10,10 +10,19 @@ function AppLayout() {
     window.scrollTo(0, 0);
   }, [pathname]);
 
+  // move focus to the page content, without changing the URL like a plain #anchor would
+  const skipToContent = (event) => {
+    event.preventDefault();
+    document.getElementById("main-content")?.focus();
+  };
+
   return (
     <div className="app-shell">
+      <a className="skip-link" href="#main-content" onClick={skipToContent}>
+        Skip to main content
+      </a>
       <Navbar />
-      <main className="page-container">
+      <main id="main-content" className="page-container" tabIndex={-1}>
         <Outlet />
       </main>
       <Footer />

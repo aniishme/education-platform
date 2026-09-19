@@ -1,6 +1,8 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import logo from "../assets/studyflow-favicon.svg";
 import FormField from "../components/FormField";
+import { verifyPassword } from "../utils/password";
 
 function Login() {
   const [email, setEmail] = useState("");
@@ -8,7 +10,7 @@ function Login() {
   const [errors, setErrors] = useState({});
   const navigate = useNavigate();
 
-  const validateForm = () => {
+  const validateForm = async () => {
     const newErrors = {};
 
     if (!email.trim()) {
@@ -26,7 +28,7 @@ function Login() {
     if (
       Object.keys(newErrors).length === 0 &&
       (email.trim().toLowerCase() !== "student@gmail.com" ||
-        password !== "student 123")
+        !(await verifyPassword(password)))
     ) {
       newErrors.credentials = "Invalid email or password.";
     }
@@ -35,10 +37,10 @@ function Login() {
     return Object.keys(newErrors).length === 0;
   };
 
-  const handleSubmit = (event) => {
+  const handleSubmit = async (event) => {
     event.preventDefault();
 
-    if (validateForm()) {
+    if (await validateForm()) {
       localStorage.setItem(
         "studyflowAuth",
         JSON.stringify({ email: "student@gmail.com", isLoggedIn: true }),
@@ -49,7 +51,10 @@ function Login() {
   return (
     <div className="login-page">
       <div className="login-card">
-        <h1>StudyFlow</h1>
+        <h1>
+          <img className="login-logo" src={logo} alt="" />
+          StudyFlow
+        </h1>
 
         <p className="login-subtitle">
           Welcome back! Please log in to continue learning.

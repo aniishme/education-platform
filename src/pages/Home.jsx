@@ -1,5 +1,7 @@
 import { Link } from "react-router-dom";
 import FeaturedCourseCard from "../components/FeaturedCourseCard";
+import { isLoggedIn } from "../utils/auth";
+import StudentHome from "./StudentHome";
 
 const featuredCourses = [
   {
@@ -33,7 +35,7 @@ const categories = [
   "Project Management",
 ];
 
-function Home() {
+function GuestHome() {
   return (
     <>
       <section className="hero-section">
@@ -48,7 +50,7 @@ function Home() {
             Browse Courses
           </Link>
         </div>
-        <div className="hero-note" aria-label="StudyFlow benefits">
+        <div className="hero-note" role="group" aria-label="StudyFlow benefits">
           <span className="hero-note-number">01</span>
           <h2>Simple, focused learning</h2>
           <p>Choose a course and learn through short, manageable lessons.</p>
@@ -88,6 +90,11 @@ function Home() {
       </section>
     </>
   );
+}
+
+// logged-in learners get their dashboard; visitors get the marketing page
+function Home() {
+  return isLoggedIn() ? <StudentHome /> : <GuestHome />;
 }
 
 export default Home;
