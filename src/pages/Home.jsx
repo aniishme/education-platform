@@ -1,6 +1,7 @@
 import { Link } from "react-router-dom";
+import AdminDashboard from "../admin/AdminDashboard";
 import FeaturedCourseCard from "../components/FeaturedCourseCard";
-import { isLoggedIn } from "../utils/auth";
+import { getRole, isLoggedIn } from "../utils/auth";
 import StudentHome from "./StudentHome";
 
 const featuredCourses = [
@@ -92,9 +93,10 @@ function GuestHome() {
   );
 }
 
-// logged-in learners get their dashboard; visitors get the marketing page
+// admins land on their dashboard, learners get theirs, visitors get the marketing page
 function Home() {
-  return isLoggedIn() ? <StudentHome /> : <GuestHome />;
+  if (!isLoggedIn()) return <GuestHome />;
+  return getRole() === "admin" ? <AdminDashboard /> : <StudentHome />;
 }
 
 export default Home;

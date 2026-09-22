@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Link, useLocation } from "react-router-dom";
+import { getAuth, getRole } from "../utils/auth";
 import { PROFILE_UPDATED_EVENT, getInitials, getSavedProfile } from "../utils/profile";
 import useDismiss from "../utils/useDismiss";
 
@@ -18,6 +19,14 @@ function UserMenu({ onLogout }) {
     return () => window.removeEventListener(PROFILE_UPDATED_EVENT, refresh);
   }, []);
 
+  const isAdmin = getRole() === "admin";
+  const displayName = isAdmin ? "Admin" : profile.name;
+  const displayEmail = isAdmin ? getAuth()?.email ?? "admin@gmail.com" : profile.email;
+  const initials = isAdmin ? "AD" : getInitials(profile.name);
+  // the security tab changes the student demo password, which has nothing to do with
+  // the admin's fixed login credential, so admins skip straight to their other settings
+  const settingsPath = isAdmin ? "/settings/notifications" : "/settings/security";
+
   return (
     <div className="nav-menu" ref={menuRef}>
       <button
@@ -27,28 +36,30 @@ function UserMenu({ onLogout }) {
         aria-expanded={isOpen}
         aria-controls="user-panel"
         aria-label="Account menu"
-        title={profile.name}
+        title={displayName}
       >
-        {getInitials(profile.name)}
+        {initials}
       </button>
 
       {isOpen && (
         <div className="nav-panel user-panel" id="user-panel">
           <div className="user-panel-identity">
-            <strong>{profile.name}</strong>
-            <span>{profile.email}</span>
+            <strong>{displayName}</strong>
+            <span>{displayEmail}</span>
           </div>
 
-          <Link to="/profile" className="panel-item" onClick={close}>
-            Profile
-          </Link>
+          {!isAdmin && (
+            <Link to="/profile" className="panel-item" onClick={close}>
+              Profile
+            </Link>
+          )}
           <Link
-            to="/settings/security"
+            to={settingsPath}
             state={{ backgroundLocation: location }}
             className="panel-item"
             onClick={close}
           >
-            Settings
+            {isAdmin ? "Admin Settings" : "Settings"}
           </Link>
           <button type="button" className="panel-item" onClick={onLogout}>
             Logout

@@ -530,18 +530,37 @@
 
 .lesson-list li {
   counter-increment: lessons;
-  padding: 20px 24px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 20px;
 }
 
 .lesson-list li + li {
   border-top: 1px solid var(--line-soft);
 }
 
-.lesson-list li > div {
+.lesson-item-button {
+  width: 100%;
+  padding: 20px 24px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  background: none;
+  border: none;
+  font: inherit;
+  color: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.lesson-item-button:disabled {
+  cursor: default;
+}
+
+.lesson-item-button:not(:disabled):hover,
+.lesson-item-button:not(:disabled):focus-visible {
+  background: var(--warm-bg);
+}
+
+.lesson-item-button > div {
   display: flex;
   align-items: center;
   gap: 14px;
@@ -560,7 +579,7 @@
   box-shadow: inset 4px 0 0 var(--accent);
 }
 
-.lesson-list li.lesson-done > div {
+.lesson-list li.lesson-done .lesson-item-button > div {
   color: var(--text-soft);
 }
 
@@ -598,7 +617,7 @@
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
-  .lesson-list li {
+  .lesson-item-button {
     align-items: flex-start;
     flex-direction: column;
     gap: 8px;

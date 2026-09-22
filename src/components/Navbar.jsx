@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { NavLink, useNavigate } from "react-router-dom";
 import logo from "../assets/studyflow-favicon.svg";
-import { isLoggedIn, logout } from "../utils/auth";
+import { getRole, isLoggedIn, logout } from "../utils/auth";
 import NavSearch from "./NavSearch";
 import NotificationMenu from "./NotificationMenu";
 import ThemeToggle from "./ThemeToggle";
@@ -20,6 +20,12 @@ const memberNavItems = [
   { to: "/progress", label: "Progress" },
 ];
 
+const adminNavItems = [
+  { to: "/", label: "Dashboard", end: true },
+  { to: "/admin/courses", label: "Manage Courses" },
+  { to: "/admin/users", label: "Manage Users" },
+];
+
 function Navbar() {
   const [authed, setAuthed] = useState(isLoggedIn);
   const navigate = useNavigate();
@@ -30,7 +36,7 @@ function Navbar() {
     navigate("/login", { replace: true });
   };
 
-  const navigationItems = authed ? memberNavItems : guestNavItems;
+  const navigationItems = !authed ? guestNavItems : getRole() === "admin" ? adminNavItems : memberNavItems;
 
   return (
     <header className="site-header">

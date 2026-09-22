@@ -1,10 +1,13 @@
 import { useCallback, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import bellIcon from "../assets/notification.png";
+import { getRecentActivity, timeAgo } from "../services/activityService";
+import { getRole } from "../utils/auth";
 import { useSettings } from "../utils/settings";
 import useDismiss from "../utils/useDismiss";
 
 const READ_KEY = "studyflowReadNotifications";
+const ADMIN_READ_KEY = "studyflowReadAdminNotifications";
 
 // sample notifications until there is a real notifications service
 // `type` ties an item to a switch in Settings → Notifications; items without one always show
@@ -34,37 +37,47 @@ const allNotifications = [
   },
 ];
 
-const getReadIds = () => {
+const getReadIds = (key) => {
   try {
-    const saved = JSON.parse(localStorage.getItem(READ_KEY));
+    const saved = JSON.parse(localStorage.getItem(key));
     return Array.isArray(saved) ? saved : [];
   } catch {
     return [];
   }
 };
 
-const saveReadIds = (ids) => {
+const saveReadIds = (key, ids) => {
   try {
-    localStorage.setItem(READ_KEY, JSON.stringify(ids));
+    localStorage.setItem(key, JSON.stringify(ids));
   } catch {
     // read state just won't persist if storage is unavailable
   }
 };
 
 function NotificationMenu() {
+  const isAdmin = getRole() === "admin";
+  const readKey = isAdmin ? ADMIN_READ_KEY : READ_KEY;
+
   const [isOpen, setIsOpen] = useState(false);
-  const [readIds, setReadIds] = useState(getReadIds);
+  const [readIds, setReadIds] = useState(() => getReadIds(readKey));
   const [settings] = useSettings();
   const menuRef = useRef(null);
   const close = useCallback(() => setIsOpen(false), []);
   useDismiss(menuRef, isOpen, close);
 
-  const notifications = allNotifications.filter((item) => !item.type || settings.notifications[item.type]);
+  const notifications = isAdmin
+    ? getRecentActivity().map((item) => ({
+        id: item.id,
+        title: item.message,
+        time: timeAgo(item.timestamp),
+        to: "/",
+      }))
+    : allNotifications.filter((item) => !item.type || settings.notifications[item.type]);
   const unreadCount = notifications.filter((item) => !readIds.includes(item.id)).length;
 
   const updateReadIds = (ids) => {
     setReadIds(ids);
-    saveReadIds(ids);
+    saveReadIds(readKey, ids);
   };
 
   const markRead = (id) => {
@@ -104,7 +117,9 @@ function NotificationMenu() {
 
           {notifications.length === 0 && (
             <p className="notification-empty">
-              No notifications. You can turn them back on in Settings.
+              {isAdmin
+                ? "No recent activity yet."
+                : "No notifications. You can turn them back on in Settings."}
             </p>
           )}
 
@@ -125,7 +140,7 @@ function NotificationMenu() {
                     <span className="notification-dot" aria-hidden="true" />
                     <span>
                       <strong>{item.title}</strong>
-                      <span className="notification-text">{item.text}</span>
+                      {item.text && <span className="notification-text">{item.text}</span>}
                       <span className="notification-time">{item.time}</span>
                     </span>
                     {isUnread && <span className="visually-hidden">Unread</span>}

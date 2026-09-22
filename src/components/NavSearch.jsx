@@ -1,13 +1,20 @@
 import { useState } from "react";
 import { useLocation, useNavigate, useSearchParams } from "react-router-dom";
+import { getRole } from "../utils/auth";
 
 function NavSearch() {
   const navigate = useNavigate();
   const { pathname } = useLocation();
   const [searchParams] = useSearchParams();
+  const isAdmin = getRole() === "admin";
 
-  // mirror the course search on the Courses page, and start empty elsewhere
-  const activeSearch = pathname === "/courses" ? searchParams.get("q") ?? "" : "";
+  // admins search their own catalogue and account list instead of the learner course page;
+  // stay on Manage Users while already there, otherwise default to Manage Courses
+  const targetPath = isAdmin ? (pathname === "/admin/users" ? "/admin/users" : "/admin/courses") : "/courses";
+  const placeholder = isAdmin ? "Search courses or users" : "Search courses";
+
+  // mirror the search on whichever page it targets, and start empty elsewhere
+  const activeSearch = pathname === targetPath ? searchParams.get("q") ?? "" : "";
   const [query, setQuery] = useState(activeSearch);
   const [syncedSearch, setSyncedSearch] = useState(activeSearch);
 
@@ -19,7 +26,7 @@ function NavSearch() {
   const handleSubmit = (event) => {
     event.preventDefault();
     const term = query.trim();
-    navigate(term ? `/courses?q=${encodeURIComponent(term)}` : "/courses");
+    navigate(term ? `${targetPath}?q=${encodeURIComponent(term)}` : targetPath);
   };
 
   return (
@@ -29,12 +36,12 @@ function NavSearch() {
         <path d="m20 20-3.5-3.5" />
       </svg>
       <label className="visually-hidden" htmlFor="nav-search">
-        Search courses
+        {placeholder}
       </label>
       <input
         id="nav-search"
         type="search"
-        placeholder="Search courses"
+        placeholder={placeholder}
         value={query}
         onChange={(event) => setQuery(event.target.value)}
       />

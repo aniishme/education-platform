@@ -3,6 +3,7 @@ import { NavLink, Navigate, useLocation, useNavigate, useParams } from "react-ro
 import ChangePasswordForm from "../components/ChangePasswordForm";
 import OptionGroup from "../components/OptionGroup";
 import ToggleSwitch from "../components/ToggleSwitch";
+import { getRole } from "../utils/auth";
 import { useSettings } from "../utils/settings";
 import useFocusTrap from "../utils/useFocusTrap";
 import "../Settings.css";
@@ -20,7 +21,7 @@ const textSizeOptions = [
   { value: "xlarge", label: "Extra large" },
 ];
 
-const sections = [
+const allSections = [
   { id: "security", label: "Security", intro: "Change the password you use to log in." },
   { id: "notifications", label: "Notifications", intro: "Choose what StudyFlow tells you about." },
   { id: "appearance", label: "Appearance", intro: "Pick a colour theme, or follow your device's setting." },
@@ -34,6 +35,8 @@ function Settings() {
   const [settings, updateSettings] = useSettings();
   const cardRef = useRef(null);
 
+  // the security tab changes the student demo password, which isn't how an admin logs in
+  const sections = getRole() === "admin" ? allSections.filter((item) => item.id !== "security") : allSections;
   const section = sections.find((item) => item.id === sectionId);
 
   // go back to the page the card was opened over (or home if it was opened directly)
