@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
+import { useSearchParams } from "react-router-dom";
 import CourseCard from "../components/CourseCard";
 import CourseFilter from "../components/CourseFilter";
 import EmptyState from "../components/EmptyState";
@@ -9,7 +10,10 @@ import { getCourses } from "../services/courseService";
 
 function Courses() {
   const [courses, setCourses] = useState([]);
-  const [search, setSearch] = useState("");
+  // the search term lives in the URL (?q=) so the navbar search can set it
+  const [searchParams, setSearchParams] = useSearchParams();
+  const search = searchParams.get("q") ?? "";
+  const setSearch = (value) => setSearchParams(value ? { q: value } : {}, { replace: true });
   const [category, setCategory] = useState("");
   const [level, setLevel] = useState("");
   const [isLoading, setIsLoading] = useState(true);

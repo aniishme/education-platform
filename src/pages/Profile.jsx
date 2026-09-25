@@ -1,36 +1,13 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
+import { getInitials, getSavedProfile, saveProfile } from "../utils/profile";
+import useFocusTrap from "../utils/useFocusTrap";
 import "../Profile.css";
-
-const defaultProfile = {
-  name: "Student 1",
-  email: "student@gmail.com",
-  studentId: "CIHE251109",
-  course: "Advanced Web Application Development",
-  memberSince: "September 2024",
-};
-
-const getSavedProfile = () => {
-  try {
-    const savedProfile = localStorage.getItem("studyflowProfile");
-    return savedProfile ? { ...defaultProfile, ...JSON.parse(savedProfile) } : defaultProfile;
-  } catch {
-    return defaultProfile;
-  }
-};
-
-const getInitials = (name) =>
-  name
-    .split(" ")
-    .filter(Boolean)
-    .map((part) => part[0])
-    .join("")
-    .slice(0, 2)
-    .toUpperCase();
 
 function Profile() {
   const [profile, setProfile] = useState(getSavedProfile);
   const [draftProfile, setDraftProfile] = useState(profile);
   const [isEditing, setIsEditing] = useState(false);
+  const modalRef = useRef(null);
 
   const handleEdit = () => {
     setDraftProfile(profile);
@@ -41,6 +18,9 @@ function Profile() {
     setDraftProfile(profile);
     setIsEditing(false);
   };
+
+  // keyboard users: focus moves into the dialog, Tab stays inside, Escape closes it
+  useFocusTrap(modalRef, isEditing, handleCancel);
 
   const handleChange = (event) => {
     const { name, value } = event.target;
@@ -57,7 +37,7 @@ function Profile() {
       course: draftProfile.course.trim(),
     };
 
-    localStorage.setItem("studyflowProfile", JSON.stringify(updatedProfile));
+    saveProfile(updatedProfile);
     setProfile(updatedProfile);
     setIsEditing(false);
   };
@@ -125,12 +105,19 @@ function Profile() {
                 <h3>{profile.course}</h3>
                 <p>Continue building practical skills through your StudyFlow learning journey.</p>
               </div>
-              <div className="course-progress" aria-label="Course progress: 68 percent">
+              <div className="course-progress">
                 <div className="course-progress-label">
                   <span>Progress</span>
                   <strong>68%</strong>
                 </div>
-                <div className="progress-track">
+                <div
+                  className="progress-track"
+                  role="progressbar"
+                  aria-label="Course progress"
+                  aria-valuemin={0}
+                  aria-valuemax={100}
+                  aria-valuenow={68}
+                >
                   <span style={{ width: "68%" }} />
                 </div>
               </div>
@@ -142,6 +129,7 @@ function Profile() {
       {isEditing && (
         <div className="profile-modal-backdrop" role="presentation" onMouseDown={handleCancel}>
           <div
+            ref={modalRef}
             className="profile-modal"
             role="dialog"
             aria-modal="true"

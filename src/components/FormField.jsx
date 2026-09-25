@@ -6,6 +6,7 @@ function FormField({
   value,
   onChange,
   error,
+  autoComplete,
 }) {
   return (
     <div className="form-group">
@@ -17,6 +18,8 @@ function FormField({
         placeholder={placeholder}
         value={value}
         onChange={onChange}
+        autoComplete={autoComplete}
+        aria-invalid={error ? true : undefined}
         aria-describedby={error ? `${id}-error` : undefined}
       />
 
