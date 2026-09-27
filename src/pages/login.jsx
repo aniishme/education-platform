@@ -1,6 +1,11 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import logo from "../assets/studyflow-favicon.svg";
 import FormField from "../components/FormField";
+import { verifyPassword } from "../utils/password";
+
+const ADMIN_EMAIL = "admin@gmail.com";
+const ADMIN_PASSWORD = "admin123";
 
 function Login() {
   const [email, setEmail] = useState("");
@@ -8,7 +13,7 @@ function Login() {
   const [errors, setErrors] = useState({});
   const navigate = useNavigate();
 
-  const validateForm = () => {
+  const validateForm = async () => {
     const newErrors = {};
 
     if (!email.trim()) {
@@ -23,25 +28,36 @@ function Login() {
       newErrors.password = "Password must be at least 6 characters.";
     }
 
-    if (
-      Object.keys(newErrors).length === 0 &&
-      (email.trim().toLowerCase() !== "student@gmail.com" ||
-        password !== "student 123")
-    ) {
-      newErrors.credentials = "Invalid email or password.";
+    if (Object.keys(newErrors).length === 0) {
+      const normalizedEmail = email.trim().toLowerCase();
+      const isAdminLogin = normalizedEmail === ADMIN_EMAIL;
+      const credentialsValid = isAdminLogin
+        ? password === ADMIN_PASSWORD
+        : normalizedEmail === "student@gmail.com" && (await verifyPassword(password));
+
+      if (!credentialsValid) {
+        newErrors.credentials = "Invalid email or password.";
+      }
     }
 
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
 
-  const handleSubmit = (event) => {
+  const handleSubmit = async (event) => {
     event.preventDefault();
 
-    if (validateForm()) {
+    if (await validateForm()) {
+      const normalizedEmail = email.trim().toLowerCase();
+      const isAdminLogin = normalizedEmail === ADMIN_EMAIL;
+
       localStorage.setItem(
         "studyflowAuth",
-        JSON.stringify({ email: "student@gmail.com", isLoggedIn: true }),
+        JSON.stringify({
+          email: normalizedEmail,
+          isLoggedIn: true,
+          role: isAdminLogin ? "admin" : "student",
+        }),
       );
       navigate("/", { replace: true });
     }
@@ -49,7 +65,10 @@ function Login() {
   return (
     <div className="login-page">
       <div className="login-card">
-        <h1>StudyFlow</h1>
+        <h1>
+          <img className="login-logo" src={logo} alt="" />
+          StudyFlow
+        </h1>
 
         <p className="login-subtitle">
           Welcome back! Please log in to continue learning.

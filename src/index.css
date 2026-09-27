@@ -5,6 +5,7 @@
 }
 
 body {
+  background: var(--bg, #ffffff);
   min-width: 320px;
   font-family: Arial, sans-serif;
   margin: 0;

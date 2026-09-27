@@ -1,0 +1,346 @@
+/* logged-in navbar: search, theme, notifications, avatar */
+
+/* never shrink below the links' own width, or they slide under the search box */
+.navbar-links-member {
+  flex: 0 0 auto;
+}
+
+.navbar-tools {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-left: auto;
+}
+
+/* ---------- search ---------- */
+
+.nav-search {
+  position: relative;
+  flex: 0 1 220px;
+  min-width: 0;
+}
+
+.nav-search svg {
+  position: absolute;
+  top: 50%;
+  left: 12px;
+  width: 16px;
+  height: 16px;
+  translate: 0 -50%;
+  fill: none;
+  stroke: var(--text-soft);
+  stroke-width: 2;
+  stroke-linecap: round;
+  pointer-events: none;
+}
+
+.nav-search input {
+  width: 100%;
+  padding: 9px 12px 9px 34px;
+  border: 1px solid var(--line-field);
+  border-radius: 999px;
+  background: var(--field);
+  color: var(--text);
+  font-size: 0.875rem;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease, background 0.15s ease;
+}
+
+.nav-search input::placeholder {
+  color: var(--placeholder);
+}
+
+.nav-search input:focus {
+  background: var(--paper);
+  border-color: var(--focus-ring);
+}
+
+/* ---------- icon + avatar buttons ---------- */
+
+.icon-button,
+.avatar-button {
+  position: relative;
+  flex-shrink: 0;
+  width: 40px;
+  height: 40px;
+  display: grid;
+  place-items: center;
+  border: none;
+  border-radius: 50%;
+  cursor: pointer;
+}
+
+.icon-button {
+  background: none;
+  transition: background 0.15s ease;
+}
+
+.icon-button:hover,
+.icon-button[aria-expanded="true"] {
+  background: rgba(79, 70, 229, 0.09);
+}
+
+.icon-button img {
+  width: 20px;
+  height: 20px;
+}
+
+/* the icons are dark artwork, so flip them on the dark theme */
+:root[data-theme="dark"] .icon-button img {
+  filter: invert(1);
+}
+
+.avatar-button {
+  background: var(--warm-chip);
+  color: var(--brand);
+  font-family: "Fraunces", Georgia, serif;
+  font-size: 0.9375rem;
+  font-weight: 600;
+}
+
+.avatar-button:hover,
+.avatar-button[aria-expanded="true"] {
+  box-shadow: 0 0 0 3px rgba(180, 83, 9, 0.22);
+}
+
+.icon-button:focus-visible,
+.avatar-button:focus-visible,
+.panel-item:focus-visible,
+.panel-text-button:focus-visible,
+.notification-item:focus-visible {
+  outline: 3px solid rgba(79, 70, 229, 0.35);
+  outline-offset: 2px;
+}
+
+.notification-badge {
+  position: absolute;
+  top: 2px;
+  right: 1px;
+  min-width: 17px;
+  height: 17px;
+  padding: 0 4px;
+  display: grid;
+  place-items: center;
+  border-radius: 999px;
+  background: var(--danger);
+  color: #ffffff;
+  font-size: 0.6875rem;
+  font-weight: 600;
+  line-height: 1;
+}
+
+/* ---------- dropdown panels ---------- */
+
+.nav-panel {
+  position: absolute;
+  top: calc(100% + 10px);
+  right: 0;
+  z-index: 20;
+  overflow: hidden;
+  background: var(--paper);
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  box-shadow: 0 18px 40px -18px rgba(var(--shadow), 0.5);
+}
+
+.notification-panel {
+  width: min(340px, 100%);
+}
+
+.user-panel {
+  width: min(230px, 100%);
+}
+
+.nav-panel-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 14px 16px;
+  border-bottom: 1px solid var(--line-soft);
+}
+
+.nav-panel-header h2 {
+  font-size: 0.9375rem;
+  font-weight: 600;
+}
+
+.panel-text-button {
+  padding: 4px 6px;
+  border: none;
+  border-radius: 6px;
+  background: none;
+  color: var(--accent);
+  font-size: 0.8125rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.panel-text-button:hover:not(:disabled) {
+  text-decoration: underline;
+}
+
+.panel-text-button:disabled {
+  color: var(--placeholder);
+  cursor: default;
+}
+
+/* ---------- notifications ---------- */
+
+.notification-list {
+  max-height: 340px;
+  overflow-y: auto;
+  list-style: none;
+}
+
+.notification-empty {
+  padding: 18px 16px;
+  color: var(--text-soft);
+  font-size: 0.875rem;
+  line-height: 1.5;
+}
+
+.notification-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 13px 16px;
+  color: var(--text);
+  font-size: 0.875rem;
+  line-height: 1.45;
+  text-decoration: none;
+  border-bottom: 1px solid var(--line-soft);
+}
+
+.notification-list li:last-child .notification-item {
+  border-bottom: none;
+}
+
+.notification-item:hover {
+  background: rgba(79, 70, 229, 0.06);
+}
+
+.notification-item strong,
+.notification-text,
+.notification-time {
+  display: block;
+}
+
+.notification-item strong {
+  font-weight: 600;
+}
+
+.notification-item:not(.unread) strong {
+  font-weight: 500;
+}
+
+.notification-text {
+  margin-top: 2px;
+  color: var(--text-soft);
+  font-size: 0.8125rem;
+}
+
+.notification-time {
+  margin-top: 4px;
+  color: var(--placeholder);
+  font-size: 0.75rem;
+}
+
+.notification-dot {
+  flex-shrink: 0;
+  width: 8px;
+  height: 8px;
+  margin-top: 6px;
+  border-radius: 50%;
+  background: transparent;
+}
+
+.notification-item.unread .notification-dot {
+  background: var(--accent);
+}
+
+/* ---------- account menu ---------- */
+
+.user-panel-identity {
+  padding: 14px 16px;
+  border-bottom: 1px solid var(--line-soft);
+}
+
+.user-panel-identity strong,
+.user-panel-identity span {
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.user-panel-identity strong {
+  font-size: 0.875rem;
+  font-weight: 600;
+}
+
+.user-panel-identity span {
+  margin-top: 2px;
+  color: var(--text-soft);
+  font-size: 0.8125rem;
+}
+
+.panel-item {
+  display: block;
+  width: 100%;
+  padding: 12px 16px;
+  border: none;
+  background: none;
+  color: var(--text);
+  font-size: 0.875rem;
+  font-weight: 600;
+  text-align: left;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.panel-item:hover {
+  background: rgba(79, 70, 229, 0.08);
+  color: var(--accent);
+}
+
+/* ---------- responsive ---------- */
+
+/* split-screen widths: tighten up, and wrap the tools to their own row if still short */
+@media (min-width: 721px) {
+  .navbar {
+    flex-wrap: wrap;
+    row-gap: 8px;
+    padding: 10px 0;
+  }
+}
+
+@media (min-width: 721px) and (max-width: 1100px) {
+  .navbar {
+    column-gap: 16px;
+  }
+
+  .navbar-links {
+    gap: 2px;
+  }
+
+  .navbar-links .nav-link {
+    padding: 9px 10px;
+  }
+}
+
+@media (max-width: 960px) {
+  .nav-search {
+    flex-basis: 150px;
+  }
+}
+
+@media (max-width: 720px) {
+  .navbar-tools {
+    width: 100%;
+  }
+
+  .nav-search {
+    flex: 1 1 auto;
+  }
+}

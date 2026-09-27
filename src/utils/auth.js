@@ -13,6 +13,14 @@ export function isLoggedIn() {
   return Boolean(getAuth()?.isLoggedIn);
 }
 
+export function getRole() {
+  return getAuth()?.role ?? "student";
+}
+
+export function isAdmin() {
+  return isLoggedIn() && getRole() === "admin";
+}
+
 export function logout() {
   localStorage.removeItem(AUTH_KEY);
 }

@@ -1,0 +1,391 @@
+/* Settings opens as one boxed card over the page you were on, styled like the Edit profile dialog */
+
+.settings-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  display: grid;
+  place-items: center;
+  padding: 24px;
+  overflow-y: auto;
+  background: rgba(27, 35, 52, 0.48);
+  animation: settings-fade 0.2s ease both;
+
+  /* Settings renders outside .app-shell, so set the app's text styles here */
+  color: var(--text);
+  font-family: "Inter", Arial, sans-serif;
+}
+
+@keyframes settings-fade {
+  from {
+    opacity: 0;
+  }
+}
+
+.settings-shell {
+  display: flex;
+  flex-direction: column;
+  width: min(880px, 100%);
+  height: min(620px, calc(100dvh - 48px));
+  overflow: hidden;
+  color: var(--text);
+  background: var(--paper);
+  border-radius: 14px;
+  box-shadow: 0 24px 60px -20px rgba(var(--shadow), 0.5);
+}
+
+.settings-shell-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 20px;
+  padding: 26px 30px 22px;
+  border-bottom: 1px solid var(--line);
+}
+
+.settings-kicker {
+  margin-bottom: 7px;
+  color: var(--brand);
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.settings-shell-header h1 {
+  color: var(--text);
+  font-family: "Fraunces", Georgia, serif;
+  font-size: 1.75rem;
+}
+
+.settings-shell-header p {
+  margin-top: 2px;
+  color: var(--text-soft);
+  font-size: 0.875rem;
+}
+
+.settings-close {
+  flex-shrink: 0;
+  width: 34px;
+  height: 34px;
+  border: 1px solid var(--line-field);
+  border-radius: 50%;
+  background: var(--paper);
+  color: var(--text-soft);
+  font-size: 1.5rem;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.settings-close:hover {
+  background: var(--bg);
+}
+
+.settings-close:focus-visible {
+  outline: 3px solid var(--focus-ring);
+  outline-offset: 2px;
+}
+
+.settings-body {
+  flex: 1;
+  min-height: 0;
+  display: grid;
+  grid-template-columns: 230px minmax(0, 1fr);
+}
+
+.settings-sidebar {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 20px 14px;
+  background: var(--bg);
+  border-right: 1px solid var(--line);
+}
+
+.settings-tab {
+  padding: 11px 14px;
+  border-radius: 9px;
+  color: var(--text);
+  font-size: 0.9375rem;
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.settings-tab:hover {
+  color: var(--accent);
+  background: rgba(79, 70, 229, 0.08);
+}
+
+.settings-tab.active {
+  color: var(--accent);
+  background: rgba(79, 70, 229, 0.12);
+  box-shadow: inset 3px 0 0 var(--accent);
+}
+
+.settings-tab:focus-visible {
+  outline: 3px solid var(--focus-ring);
+  outline-offset: 2px;
+}
+
+.settings-panel {
+  min-width: 0;
+  padding: 28px 30px;
+  overflow-y: auto;
+}
+
+.settings-panel h2 {
+  margin: 0 0 6px;
+  color: var(--text);
+  font-family: "Fraunces", Georgia, serif;
+  font-size: 1.5625rem;
+  font-weight: 600;
+}
+
+.settings-card-intro {
+  margin-bottom: 20px;
+  color: var(--text-soft);
+  font-size: 0.9375rem;
+  line-height: 1.6;
+}
+
+/* ---------- switches ---------- */
+
+.setting-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  padding: 16px 0;
+  border-top: 1px solid var(--line-soft);
+  cursor: pointer;
+}
+
+.setting-text {
+  display: block;
+}
+
+.setting-title,
+.setting-description {
+  display: block;
+}
+
+.setting-title {
+  font-size: 0.9375rem;
+  font-weight: 600;
+}
+
+.setting-description {
+  margin-top: 2px;
+  color: var(--text-soft);
+  font-size: 0.875rem;
+  line-height: 1.5;
+}
+
+.switch {
+  position: relative;
+  flex-shrink: 0;
+  width: 46px;
+  height: 26px;
+}
+
+/* the real checkbox stays in place (and focusable) but is invisible */
+.switch input {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  opacity: 0;
+  cursor: pointer;
+}
+
+.switch-track {
+  position: absolute;
+  inset: 0;
+  border-radius: 999px;
+  background: var(--line-strong);
+  pointer-events: none;
+  transition: background 0.2s ease;
+}
+
+.switch-track::after {
+  content: "";
+  position: absolute;
+  top: 3px;
+  left: 3px;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: #ffffff;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+  transition: transform 0.2s ease;
+}
+
+.switch input:checked + .switch-track {
+  background: var(--accent);
+}
+
+.switch input:checked + .switch-track::after {
+  transform: translateX(20px);
+}
+
+.switch input:focus-visible + .switch-track {
+  outline: 3px solid var(--focus-ring);
+  outline-offset: 3px;
+}
+
+/* ---------- radio option groups ---------- */
+
+.option-group {
+  margin: 0 0 4px;
+  padding: 0;
+  border: none;
+  min-width: 0;
+}
+
+.option-group legend {
+  margin-bottom: 10px;
+  padding: 0;
+  font-size: 0.9375rem;
+  font-weight: 600;
+}
+
+.option-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.option {
+  position: relative;
+  cursor: pointer;
+}
+
+.option input {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  opacity: 0;
+  cursor: pointer;
+}
+
+.option-card {
+  display: block;
+  min-width: 96px;
+  padding: 11px 18px;
+  border: 1px solid var(--line-field);
+  border-radius: 9px;
+  background: var(--field);
+  color: var(--text);
+  font-size: 0.9375rem;
+  font-weight: 600;
+  text-align: center;
+  pointer-events: none;
+  transition: border-color 0.15s ease, background 0.15s ease;
+}
+
+.option:hover .option-card {
+  border-color: var(--accent);
+}
+
+.option input:checked + .option-card {
+  border-color: var(--accent);
+  background: rgba(79, 70, 229, 0.1);
+  color: var(--accent);
+  box-shadow: inset 0 0 0 1px var(--accent);
+}
+
+.option input:focus-visible + .option-card {
+  outline: 3px solid var(--focus-ring);
+  outline-offset: 3px;
+}
+
+.settings-panel .option-group + .setting-row {
+  margin-top: 16px;
+}
+
+/* ---------- password form ---------- */
+
+.password-form {
+  max-width: 420px;
+}
+
+.settings-button {
+  padding: 12px 22px;
+  border: none;
+  border-radius: 9px;
+  background: var(--accent);
+  color: #ffffff;
+  font-family: inherit;
+  font-size: 0.9375rem;
+  font-weight: 600;
+  cursor: pointer;
+  box-shadow: 0 6px 16px -6px rgba(79, 70, 229, 0.55);
+  transition: background 0.15s ease;
+}
+
+.settings-button:hover:not(:disabled) {
+  background: var(--accent-dark);
+}
+
+.settings-button:disabled {
+  opacity: 0.7;
+  cursor: default;
+}
+
+.settings-success {
+  margin-bottom: 20px;
+  padding: 12px 14px;
+  border-radius: 9px;
+  background: var(--success-bg);
+  color: var(--success-text);
+  font-size: 0.875rem;
+  font-weight: 600;
+}
+
+@media (max-width: 720px) {
+  /* sidebar becomes a scrollable row of tabs above the section */
+  .settings-overlay {
+    padding: 12px;
+  }
+
+  .settings-shell {
+    height: min(640px, calc(100dvh - 24px));
+  }
+
+  .settings-shell-header {
+    padding: 20px;
+  }
+
+  .settings-body {
+    grid-template-columns: 1fr;
+    grid-template-rows: auto minmax(0, 1fr);
+  }
+
+  .settings-sidebar {
+    flex-direction: row;
+    padding: 12px;
+    overflow-x: auto;
+    border-right: none;
+    border-bottom: 1px solid var(--line);
+  }
+
+  .settings-tab {
+    flex-shrink: 0;
+    white-space: nowrap;
+  }
+
+  .settings-tab.active {
+    box-shadow: inset 0 -3px 0 var(--accent);
+  }
+
+  .settings-panel {
+    padding: 22px;
+  }
+
+  .setting-row {
+    gap: 14px;
+  }
+}

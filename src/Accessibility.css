@@ -1,0 +1,94 @@
+/* Global accessibility: helpers plus the Settings → Accessibility / Appearance switches.
+   Each switch is a data attribute on <html>, set from src/utils/settings.js. */
+
+/* ---------- helpers ---------- */
+
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+
+.skip-link {
+  position: absolute;
+  top: 8px;
+  left: 8px;
+  z-index: 100;
+  padding: 10px 16px;
+  border-radius: 8px;
+  background: var(--accent);
+  color: #ffffff;
+  font-size: 0.875rem;
+  font-weight: 600;
+  text-decoration: none;
+  transform: translateY(-200%);
+}
+
+.skip-link:focus {
+  transform: translateY(0);
+}
+
+/* the skip link moves focus here, so it doesn't need a ring of its own */
+#main-content:focus {
+  outline: none;
+}
+
+/* ---------- text size ---------- */
+
+html[data-text-size="small"] {
+  font-size: 87.5%;
+}
+
+html[data-text-size="large"] {
+  font-size: 115%;
+}
+
+html[data-text-size="xlarge"] {
+  font-size: 130%;
+}
+
+/* ---------- dyslexia-friendly font ---------- */
+
+html[data-font="dyslexia"] *,
+html[data-font="dyslexia"] *::before,
+html[data-font="dyslexia"] *::after {
+  font-family: "OpenDyslexic", "Lexend", "Comic Sans MS", Verdana, sans-serif !important;
+  letter-spacing: 0.02em;
+  word-spacing: 0.06em;
+}
+
+/* ---------- reduce motion ---------- */
+
+html[data-motion="reduce"] *,
+html[data-motion="reduce"] *::before,
+html[data-motion="reduce"] *::after {
+  animation: none !important;
+  transition: none !important;
+  scroll-behavior: auto !important;
+}
+
+/* ---------- visible focus outlines ---------- */
+
+html[data-focus="visible"] :focus-visible {
+  outline: 3px solid var(--focus-ring) !important;
+  outline-offset: 3px !important;
+}
+
+/* text fields get a single ring: the border turns --focus-ring and this
+   outline sits flush against it, so it reads as one thick border, not two */
+input:focus-visible,
+textarea:focus-visible,
+select:focus-visible {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: 0;
+}
+
+html[data-focus="visible"] input:focus-visible,
+html[data-focus="visible"] textarea:focus-visible,
+html[data-focus="visible"] select:focus-visible {
+  outline: 3px solid var(--focus-ring) !important;
+  outline-offset: 0 !important;
+}

@@ -10,13 +10,13 @@
 .progress-heading h1 {
   margin: 8px 0 12px;
   font-family: "Fraunces", Georgia, serif;
-  font-size: clamp(38px, 5vw, 52px);
+  font-size: clamp(2.375rem, 5vw, 3.25rem);
   letter-spacing: -0.025em;
 }
 
 .progress-heading > p:last-child {
   color: var(--text-soft);
-  font-size: 16px;
+  font-size: 1rem;
   line-height: 1.65;
 }
 
@@ -31,7 +31,7 @@
 .progress-course-card,
 .progress-learning-stats {
   background: var(--paper);
-  border: 1px solid #e1e6ef;
+  border: 1px solid var(--line);
   border-radius: 14px;
   box-shadow: 0 16px 36px -28px rgba(var(--shadow), 0.45);
 }
@@ -50,7 +50,7 @@
   display: grid;
   place-items: center;
   border-radius: 50%;
-  background: conic-gradient(var(--accent) var(--progress-value), #e9edf4 0);
+  background: conic-gradient(var(--accent) var(--progress-value), var(--track) 0);
 }
 
 .progress-total-visual > div {
@@ -66,19 +66,19 @@
 .progress-total-visual strong {
   color: var(--accent);
   font-family: "Fraunces", Georgia, serif;
-  font-size: 30px;
+  font-size: 1.875rem;
 }
 
 .progress-total-visual span {
   color: var(--text-soft);
-  font-size: 12px;
+  font-size: 0.75rem;
   font-weight: 600;
 }
 
 .progress-card-kicker {
   margin-bottom: 7px;
   color: var(--brand);
-  font-size: 12px;
+  font-size: 0.75rem;
   font-weight: 600;
   letter-spacing: 0.08em;
   text-transform: uppercase;
@@ -91,7 +91,7 @@
 
 .progress-total-card h2 {
   margin-bottom: 10px;
-  font-size: 25px;
+  font-size: 1.5625rem;
 }
 
 .progress-card-copy {
@@ -115,13 +115,13 @@
 .progress-stat-card strong {
   color: var(--brand);
   font-family: "Fraunces", Georgia, serif;
-  font-size: 29px;
+  font-size: 1.8125rem;
 }
 
 .progress-stat-card span,
 .progress-lesson-count {
   color: var(--text-soft);
-  font-size: 13px;
+  font-size: 0.8125rem;
   font-weight: 600;
 }
 
@@ -134,7 +134,7 @@
 }
 
 .progress-section-heading h2 {
-  font-size: 30px;
+  font-size: 1.875rem;
 }
 
 .progress-course-list {
@@ -158,12 +158,12 @@
 .progress-course-header h3 {
   margin: 12px 0 7px;
   font-family: "Fraunces", Georgia, serif;
-  font-size: 23px;
+  font-size: 1.4375rem;
 }
 
 .progress-course-header p {
   color: var(--text-soft);
-  font-size: 14px;
+  font-size: 0.875rem;
 }
 
 .progress-status {
@@ -172,13 +172,13 @@
   border-radius: 999px;
   background: rgba(79, 70, 229, 0.09);
   color: var(--accent);
-  font-size: 12px;
+  font-size: 0.75rem;
   font-weight: 600;
 }
 
 .progress-status.completed {
-  background: #e9f6ee;
-  color: #287052;
+  background: var(--success-bg);
+  color: var(--success-text);
 }
 
 .progress-bar-heading {
@@ -186,7 +186,7 @@
   justify-content: space-between;
   margin-bottom: 9px;
   color: var(--text-soft);
-  font-size: 13px;
+  font-size: 0.8125rem;
   font-weight: 600;
 }
 
@@ -198,7 +198,7 @@
   height: 9px;
   overflow: hidden;
   border-radius: 999px;
-  background: #e9edf4;
+  background: var(--track);
 }
 
 .progress-bar-track span {
@@ -223,7 +223,7 @@
   align-items: center;
   gap: 12px;
   padding-top: 18px;
-  border-top: 1px solid #e8ebf1;
+  border-top: 1px solid var(--line-soft);
 }
 
 .learning-stat-icon {
@@ -232,7 +232,7 @@
   display: grid;
   place-items: center;
   border-radius: 50%;
-  background: #fff0d9;
+  background: var(--warm-chip);
   color: var(--brand);
   font-weight: 700;
 }
@@ -244,12 +244,12 @@
 
 .learning-stats-grid strong {
   font-family: "Fraunces", Georgia, serif;
-  font-size: 20px;
+  font-size: 1.25rem;
 }
 
 .learning-stats-grid div div span {
   color: var(--text-soft);
-  font-size: 12px;
+  font-size: 0.75rem;
   font-weight: 600;
 }
 

@@ -25,7 +25,14 @@ function ProgressBar({ value, label }) {
         <span>{label}</span>
         <strong>{value}%</strong>
       </div>
-      <div className="progress-bar-track" aria-label={`${value}% complete`}>
+      <div
+        className="progress-bar-track"
+        role="progressbar"
+        aria-label={label}
+        aria-valuemin={0}
+        aria-valuemax={100}
+        aria-valuenow={value}
+      >
         <span style={{ width: `${value}%` }} />
       </div>
     </div>

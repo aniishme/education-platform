@@ -11,10 +11,6 @@ function CourseCard({ course }) {
       <p className="course-description">{course.description}</p>
       <dl className="course-meta">
         <div>
-          <dt>Instructor</dt>
-          <dd>{course.instructor}</dd>
-        </div>
-        <div>
           <dt>Duration</dt>
           <dd>{course.duration}</dd>
         </div>

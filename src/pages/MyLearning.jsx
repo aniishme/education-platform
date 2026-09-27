@@ -17,7 +17,7 @@ function MyLearning() {
         <p>Pick up where you left off and keep building your skills.</p>
       </div>
 
-      <div className="learning-summary" aria-label="Learning summary">
+      <div className="learning-summary" role="group" aria-label="Learning summary">
         <div>
           <strong>{enrolledCourses.length}</strong>
           <span>Enrolled courses</span>
@@ -59,7 +59,14 @@ function MyLearning() {
                   <span>Course progress</span>
                   <strong>{enrollment.progress}%</strong>
                 </div>
-                <div className="learning-progress-track" aria-label={`${enrollment.progress}% complete`}>
+                <div
+                  className="learning-progress-track"
+                  role="progressbar"
+                  aria-label={`${course.title} progress`}
+                  aria-valuemin={0}
+                  aria-valuemax={100}
+                  aria-valuenow={enrollment.progress}
+                >
                   <span style={{ width: `${enrollment.progress}%` }} />
                 </div>
                 <Link className="learning-continue-button" to={`/courses/${course.id}`}>
