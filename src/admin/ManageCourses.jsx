@@ -1,10 +1,14 @@
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import EmptyState from "../components/EmptyState";
 import FormField from "../components/FormField";
 import SortIcon from "./SortIcon";
 import { logActivity } from "../services/activityService";
-import { addCourse, getAllCourses, updateCourse } from "../services/courseService";
+import {
+  addCourse,
+  getCourses,
+  updateCourse,
+} from "../services/courseService";
 import { getUsers } from "../services/userService";
 import useFocusTrap from "../utils/useFocusTrap";
 import "../Dashboard.css";
@@ -35,7 +39,19 @@ const columns = [
 const emptyForm = { title: "", description: "", category: categories[0], level: levels[0], duration: "" };
 
 function ManageCourses() {
-  const [courses, setCourses] = useState(getAllCourses);
+  const [courses, setCourses] = useState([]);
+  useEffect(() => {
+  async function loadCourses() {
+    try {
+      const courseData = await getCourses();
+      setCourses(courseData);
+    } catch (error) {
+      console.error("Unable to load courses:", error);
+    }
+  }
+
+  loadCourses();
+}, []);
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [editingId, setEditingId] = useState(null);
   const [form, setForm] = useState(emptyForm);
@@ -117,7 +133,7 @@ function ManageCourses() {
     setForm((previous) => ({ ...previous, [field]: event.target.value }));
   };
 
-  const handleSubmit = (event) => {
+  const handleSubmit = async (event) => {
     event.preventDefault();
 
     const newErrors = {};
@@ -133,13 +149,26 @@ function ManageCourses() {
     if (editingId) {
       const course = updateCourse(editingId, form);
       logActivity(`Course updated: ${course.title}`);
+      setCourses(getAllCourses());
+      closeForm();
     } else {
-      const course = addCourse(form);
-      logActivity(`New course added: ${course.title}`);
-    }
+      try {
+        const course = await addCourse(form);
 
-    setCourses(getAllCourses());
-    closeForm();
+        logActivity(`New course added: ${course.title}`);
+
+        const updatedCourses = await getCourses();
+        setCourses(updatedCourses);
+
+        closeForm();
+      } catch (error) {
+        console.error("Error creating course:", error);
+
+        setErrors({
+          submit: error.message || "Unable to create course.",
+        });
+      }
+    }
   };
 
   return (
@@ -297,7 +326,11 @@ function ManageCourses() {
                 onChange={updateField("duration")}
                 error={errors.duration}
               />
-
+              {errors.submit && (
+  <p className="error-message" role="alert">
+    {errors.submit}
+  </p>
+)}
               <button type="submit" className="login-button">
                 {editingId ? "Save Changes" : "Create Course"}
               </button>
