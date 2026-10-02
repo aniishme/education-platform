@@ -28,6 +28,10 @@ function CourseDetails() {
 
   const [searchParams, setSearchParams] = useSearchParams();
   const resumeLessonId = searchParams.get("lesson");
+  const [completedLessons, setCompletedLessons] = useState([]);
+const [completionLoading, setCompletionLoading] = useState(false);
+
+const userId = localStorage.getItem("userId") || localStorage.getItem("user_id");
 
   useEffect(() => {
     const backendCourseId = courseIdMap[id];
@@ -62,6 +66,36 @@ function CourseDetails() {
       setLessonsLoading(false);
     }
   }, [id]);
+  useEffect(() => {
+  const backendCourseId = courseIdMap[id];
+
+  const fetchProgress = async () => {
+    if (!userId || !backendCourseId) {
+      setCompletedLessons([]);
+      return;
+    }
+
+    try {
+      const response = await fetch(
+        `http://localhost:5000/api/lessons/progress/${userId}/${backendCourseId}`
+      );
+
+      if (!response.ok) {
+        throw new Error("Failed to fetch lesson progress");
+      }
+
+      const data = await response.json();
+
+      setCompletedLessons(
+        data.map((item) => Number(item.lesson_id))
+      );
+    } catch (error) {
+      console.error("Error fetching lesson progress:", error);
+    }
+  };
+
+  fetchProgress();
+}, [id, userId]);
 
   const resumeIndex = lessons.findIndex(
     (lesson) => String(lesson.id) === String(resumeLessonId)
@@ -78,6 +112,52 @@ function CourseDetails() {
 
     return () => cancelAnimationFrame(frame);
   }, [resumeIndex]);
+
+const handleCompleteLesson = async (lessonId) => {
+  if (!userId) {
+    alert("Please log in to track your progress.");
+    return;
+  }
+
+  try {
+    setCompletionLoading(true);
+
+    const response = await fetch(
+      "http://localhost:5000/api/lessons/complete",
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          userId: Number(userId),
+          lessonId: Number(lessonId),
+        }),
+      }
+    );
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      throw new Error(data.message || "Failed to complete lesson");
+    }
+
+    setCompletedLessons((previous) => {
+      if (previous.includes(Number(lessonId))) {
+        return previous;
+      }
+
+      return [...previous, Number(lessonId)];
+    });
+
+    alert("Lesson completed!");
+  } catch (error) {
+    console.error("Error completing lesson:", error);
+    alert("Unable to mark lesson as completed.");
+  } finally {
+    setCompletionLoading(false);
+  }
+};
 
   if (!course) {
     return (
@@ -213,10 +293,7 @@ function CourseDetails() {
 
           {lessons.map((lesson, index) => {
             const isCurrent = index === resumeIndex;
-
-            const isDone =
-              resumeIndex !== -1 &&
-              index < resumeIndex;
+            const isDone = completedLessons.includes(Number(lesson.id));
 
             return (
               <li
@@ -269,8 +346,20 @@ function CourseDetails() {
                   <span className="lesson-duration">
                     {lesson.duration}
                   </span>
-                </button>
-              </li>
+                  </button>
+                  {isEnrolled && (
+  <button
+    type="button"
+    className="lesson-complete-button"
+    disabled={isDone || completionLoading}
+    onClick={() => handleCompleteLesson(lesson.id)}
+    >
+      
+     {isDone ? "✓ Completed" : "Mark Complete"}
+  </button>
+)}
+            
+             </li>
             );
           })}
         </ol>
