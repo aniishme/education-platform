@@ -1,5 +1,6 @@
 const express = require("express");
 const cors = require("cors");
+const lessonRoutes = require("./routes/lessonRoutes");
 
 const app = express();
 const PORT = 5000;
@@ -10,6 +11,7 @@ app.use(express.json());
 const courseRoutes = require("./routes/courseRoutes");
 
 app.use("/api/courses", courseRoutes);
+app.use("/api/lessons", lessonRoutes);
 
 app.get("/", (req, res) => {
   res.json({
