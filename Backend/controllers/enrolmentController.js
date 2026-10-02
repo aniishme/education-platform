@@ -78,8 +78,37 @@ const createEnrolment = async (req, res) => {
         });
     }
 };
-module.exports = {
-    getEnrolments,
-    createEnrolment
+
+const deleteEnrolment = async (req, res) => {
+    try {
+        const { id } = req.params;
+
+        const [result] = await db.query(
+            "DELETE FROM enrolments WHERE id = ?",
+            [id]
+        );
+
+        if (result.affectedRows === 0) {
+            return res.status(404).json({
+                message: "Enrolment not found"
+            });
+        }
+
+        res.json({
+            message: "Course enrolment deleted successfully"
+        });
+
+    } catch (error) {
+        console.error("Error deleting enrolment:", error);
+
+        res.status(500).json({
+            message: "Unable to delete enrolment"
+        });
+    }
 };
 
+module.exports = {
+    getEnrolments,
+    createEnrolment,
+    deleteEnrolment
+};

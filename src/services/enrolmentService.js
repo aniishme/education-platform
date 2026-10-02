@@ -31,3 +31,17 @@ export async function createEnrolment(userId, courseId) {
 
   return data.enrolment;
 }
+
+export async function deleteEnrolment(id) {
+  const response = await fetch(`${API_URL}/${id}`, {
+    method: "DELETE",
+  });
+
+  const data = await response.json();
+
+  if (!response.ok) {
+    throw new Error(data.message || "Unable to leave course");
+  }
+
+  return data;
+}
