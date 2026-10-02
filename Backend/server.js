@@ -7,6 +7,7 @@ const userRoutes = require("./routes/userRoutes");
 const enrolmentRoutes = require("./routes/enrolmentRoutes");
 const activityRoutes = require("./routes/activityRoutes");
 const learnerGrowthRoutes = require("./routes/learnerGrowthRoutes");
+const lessonRoutes = require("./routes/lessonRoutes");
 const app = express();
 const PORT = 5000;
 
@@ -20,7 +21,8 @@ app.use("/api/users", userRoutes);
 app.use("/api/enrolments", enrolmentRoutes);
 app.use("/api/activity", activityRoutes);
 app.use("/api/learner-growth", learnerGrowthRoutes);
-// Test route
+app.use("/api/lessons", lessonRoutes);
+
 app.get("/", (req, res) => {
     res.json({
         message: "StudyFlow backend is running!"
