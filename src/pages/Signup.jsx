@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
+import logo from "../assets/studyflow-favicon.svg";
 import FormField from "../components/FormField";
 
 function Signup() {
@@ -63,7 +64,10 @@ function Signup() {
   return (
     <div className="login-page">
       <div className="login-card">
-        <h1>StudyFlow</h1>
+        <h1>
+          <img className="login-logo" src={logo} alt="" />
+          StudyFlow
+        </h1>
 
         <p className="login-subtitle">
           Create an account to start tracking what you study.
