@@ -156,6 +156,31 @@
   transition: background 0.15s ease, transform 0.12s ease;
 }
 
+.learning-leave-button {
+  width: 100%;
+  margin-top: 10px;
+  padding: 10px 16px;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  background: transparent;
+  color: #6b7280;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.learning-leave-button:hover {
+  border-color: #dc2626;
+  color: #dc2626;
+  background: #fef2f2;
+}
+
+.learning-leave-button:focus-visible {
+  outline: 2px solid #2563eb;
+  outline-offset: 2px;
+}
+
 .learning-continue-button:hover {
   background: var(--accent-dark);
   transform: translateY(-1px);

@@ -5,6 +5,8 @@ const ADDED_COURSES_KEY = "studyflowAdminCourses";
 // file, so they're kept here as a patch layered on top of it, keyed by course id
 const COURSE_EDITS_KEY = "studyflowCourseEdits";
 const ENROLLMENTS_KEY = "studyflowEnrollments";
+const API_URL = "http://localhost:5000/api/courses";
+
 
 function readAddedCourses() {
   try {
@@ -48,10 +50,14 @@ export function getAllCourses() {
   return [...builtIn, ...readAddedCourses()];
 }
 
-export function getCourses() {
-  return new Promise((resolve) => {
-    setTimeout(() => resolve(getAllCourses()), 500);
-  });
+export async function getCourses() {
+  const response = await fetch("http://localhost:5000/api/courses");
+
+  if (!response.ok) {
+    throw new Error("Unable to fetch courses");
+  }
+
+  return response.json();
 }
 
 export function getCourseById(courseId) {
@@ -78,39 +84,76 @@ export function enrollInCourse(courseId) {
   }
 }
 
-export function addCourse({ title, description, category, level, duration }) {
-  const course = {
-    id: `${slugify(title)}-${Date.now().toString(36)}`,
-    title: title.trim(),
-    description: description.trim(),
-    category,
-    level,
-    duration: duration.trim(),
-    instructor: "TBD",
-    totalLessons: 0,
-    lessons: [],
-  };
+export async function addCourse({
+  title,
+  description,
+  category,
+  level,
+  duration,
+}) {
+  const response = await fetch(API_URL, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      title: title.trim(),
+      description: description.trim(),
+      category,
+      level,
+      duration: duration.trim(),
+      instructor: "StudyFlow Team",
+      image: "",
+    }),
+  });
 
-  writeAddedCourses([...readAddedCourses(), course]);
-  return course;
-}
+  const data = await response.json();
 
-export function updateCourse(id, { title, description, category, level, duration }) {
-  const fields = { title: title.trim(), description: description.trim(), category, level, duration: duration.trim() };
-
-  const addedCourses = readAddedCourses();
-  const addedIndex = addedCourses.findIndex((course) => course.id === id);
-
-  if (addedIndex !== -1) {
-    addedCourses[addedIndex] = { ...addedCourses[addedIndex], ...fields };
-    writeAddedCourses(addedCourses);
-    return addedCourses[addedIndex];
+  if (!response.ok) {
+    throw new Error(data.message || "Unable to create course");
   }
 
-  const edits = readCourseEdits();
-  edits[id] = { ...edits[id], ...fields };
-  writeCourseEdits(edits);
+  return data.course;
+}
+export async function updateCourse(
+  id,
+  { title, description, category, level, duration }
+) {
+  const response = await fetch(`${API_URL}/${id}`, {
+    method: "PUT",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      title: title.trim(),
+      description: description.trim(),
+      category,
+      level,
+      duration: duration.trim(),
+      instructor: "StudyFlow Team",
+      image: "",
+    }),
+  });
 
-  const base = courses.find((course) => course.id === id);
-  return { ...base, ...edits[id] };
+  const data = await response.json();
+
+  if (!response.ok) {
+    throw new Error(data.message || "Unable to update course");
+  }
+
+  return data.course;
+}
+
+export async function deleteCourse(id) {
+  const response = await fetch(`${API_URL}/${id}`, {
+    method: "DELETE",
+  });
+
+  const data = await response.json();
+
+  if (!response.ok) {
+    throw new Error(data.message || "Unable to delete course");
+  }
+
+  return data;
 }

@@ -1,71 +1,55 @@
-const USERS_KEY = "studyflowUsers";
+const API_URL = "http://localhost:5000/api/users";
 
-// seed data: only used the first time the admin opens Manage Users in a browser
-const seedUsers = [
-  {
-    id: "u1",
-    name: "John Carter",
-    email: "john@gmail.com",
-    role: "Student",
-    status: "active",
-    enrolledCourseIds: ["react-fundamentals", "python-programming"],
-  },
-  {
-    id: "u2",
-    name: "Sarah Lee",
-    email: "sarah@gmail.com",
-    role: "Student",
-    status: "active",
-    enrolledCourseIds: ["cybersecurity-essentials"],
-  },
-  {
-    id: "u3",
-    name: "Priya Sharma",
-    email: "priya@gmail.com",
-    role: "Student",
-    status: "active",
-    enrolledCourseIds: ["cloud-computing-foundations", "networking-basics"],
-  },
-  {
-    id: "u4",
-    name: "Daniel Morgan",
-    email: "daniel@gmail.com",
-    role: "Student",
-    status: "deactivated",
-    enrolledCourseIds: ["ui-ux-design-basics"],
-  },
-];
+export async function getUsers() {
+  const response = await fetch(API_URL);
 
-function readUsers() {
-  try {
-    const raw = localStorage.getItem(USERS_KEY);
-    if (raw) return JSON.parse(raw);
-  } catch {
-    // fall through to reseeding
+  const data = await response.json();
+
+  if (!response.ok) {
+    throw new Error(data.message || "Unable to fetch users");
   }
 
-  localStorage.setItem(USERS_KEY, JSON.stringify(seedUsers));
-  return seedUsers;
+  return data;
 }
 
-function writeUsers(users) {
-  localStorage.setItem(USERS_KEY, JSON.stringify(users));
+export async function updateUser(id, { name, email, role }) {
+  const response = await fetch(`${API_URL}/${id}`, {
+    method: "PUT",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      name: name.trim(),
+      email: email.trim(),
+      role,
+    }),
+  });
+
+  const data = await response.json();
+
+  if (!response.ok) {
+    throw new Error(data.message || "Unable to update user");
+  }
+
+  return data.user;
 }
 
-export function getUsers() {
-  return readUsers();
-}
+export async function updateUserStatus(id, status) {
+  const response = await fetch(`${API_URL}/${id}/status`, {
+    method: "PUT",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      status,
+    }),
+  });
 
-export function setUserStatus(id, status) {
-  const users = readUsers().map((user) => (user.id === id ? { ...user, status } : user));
-  writeUsers(users);
-  return users.find((user) => user.id === id);
-}
+  const data = await response.json();
 
-export function updateUser(id, { name, email, role }) {
-  const users = readUsers().map((user) =>
-    user.id === id ? { ...user, name: name.trim(), email: email.trim(), role } : user,
-  );
-  writeUsers(users);
-  return users.find((user) => user.id === id);
+  if (!response.ok) {
+    throw new Error(data.message || "Unable to update user status");
+  }
+
+  return data.user;
 }

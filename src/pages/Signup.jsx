@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import logo from "../assets/studyflow-favicon.svg";
@@ -11,17 +12,18 @@ function Signup() {
   const [errors, setErrors] = useState({});
   const navigate = useNavigate();
 
-  // wipe a field's error the moment the user starts fixing it
+  // Wipe a field's error when the user starts fixing it
   const clearError = (field) => {
     setErrors((previous) => {
       if (!previous[field]) return previous;
+
       const next = { ...previous };
       delete next[field];
       return next;
     });
   };
 
-  const handleSubmit = (event) => {
+  const handleSubmit = async (event) => {
     event.preventDefault();
 
     const newErrors = {};
@@ -56,9 +58,42 @@ function Signup() {
       return;
     }
 
-    // replace this with your real sign-up call
-    alert("Account created!");
-    navigate("/login");
+    try {
+      const response = await fetch(
+        "http://localhost:5000/api/auth/signup",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            name: name.trim(),
+            email: email.trim().toLowerCase(),
+            password,
+          }),
+        }
+      );
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        setErrors({
+          credentials: data.message || "Unable to create account.",
+        });
+        return;
+      }
+
+      alert("Account created successfully!");
+      navigate("/login");
+
+    } catch (error) {
+      console.error("Signup error:", error);
+
+      setErrors({
+        credentials:
+          "Unable to connect to the server. Please try again.",
+      });
+    }
   };
 
   return (
@@ -129,6 +164,15 @@ function Signup() {
           <button type="submit" className="login-button">
             Create account
           </button>
+
+          {errors.credentials && (
+            <p
+              className="error-message login-form-error"
+              role="alert"
+            >
+              {errors.credentials}
+            </p>
+          )}
         </form>
 
         <p className="login-footer">

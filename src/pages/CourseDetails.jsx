@@ -1,18 +1,74 @@
 import { useEffect, useRef, useState } from "react";
 import { Link, useParams, useSearchParams } from "react-router-dom";
-import { getCourseById, isEnrolledInCourse, enrollInCourse } from "../services/courseService";
+import { getCourses } from "../services/courseService";
+import { getEnrolments, createEnrolment } from "../services/enrolmentService";
+import { logActivity } from "../services/activityService";
+import { getAuth } from "../utils/auth";
 
 function CourseDetails() {
   const { id } = useParams();
-  const course = getCourseById(id);
-  const [isEnrolled, setIsEnrolled] = useState(() => isEnrolledInCourse(id));
+const [course, setCourse] = useState(null);
+const [courseLoading, setCourseLoading] = useState(true);
+ const [isEnrolled, setIsEnrolled] = useState(false);
+ const [enrolmentLoading, setEnrolmentLoading] = useState(true);
   const resumeRef = useRef(null);
   const lessonSectionRef = useRef(null);
 
   // ?lesson=<id> comes from "Resume lesson" on the dashboard, or from clicking a lesson below
   const [searchParams, setSearchParams] = useSearchParams();
   const resumeLessonId = searchParams.get("lesson");
-  const resumeIndex = course?.lessons.findIndex((lesson) => lesson.id === resumeLessonId) ?? -1;
+  const resumeIndex =
+  course?.lessons?.findIndex((lesson) => lesson.id === resumeLessonId) ?? -1;
+  useEffect(() => {
+  async function loadCourse() {
+    try {
+      const courses = await getCourses();
+
+      const foundCourse = courses.find(
+        (item) => Number(item.id) === Number(id)
+      );
+
+      setCourse(foundCourse || null);
+    } catch (error) {
+      console.error("Unable to load course:", error);
+      setCourse(null);
+    } finally {
+      setCourseLoading(false);
+    }
+  }
+
+  loadCourse();
+}, [id]);
+  
+  useEffect(() => {
+  async function checkEnrolment() {
+    try {
+      const auth = getAuth();
+
+      if (!auth?.userId) {
+        setIsEnrolled(false);
+        return;
+      }
+
+      const enrolments = await getEnrolments();
+
+      const enrolled = enrolments.some(
+        (enrolment) =>
+          Number(enrolment.user_id) === Number(auth.userId) &&
+          Number(enrolment.course_id) === Number(id)
+      );
+
+      setIsEnrolled(enrolled);
+    } catch (error) {
+      console.error("Unable to check enrolment:", error);
+      setIsEnrolled(false);
+    } finally {
+      setEnrolmentLoading(false);
+    }
+  }
+
+  checkEnrolment();
+}, [id]);
 
   useEffect(() => {
     if (resumeIndex === -1) return undefined;
@@ -21,7 +77,14 @@ function CourseDetails() {
     const frame = requestAnimationFrame(() => resumeRef.current?.scrollIntoView({ block: "center" }));
     return () => cancelAnimationFrame(frame);
   }, [resumeIndex]);
-
+  
+  if (courseLoading) {
+  return (
+    <section className="empty-state">
+      <p>Loading course...</p>
+    </section>
+  );
+}
   if (!course) {
     return (
       <section className="empty-state course-not-found">
@@ -68,10 +131,26 @@ function CourseDetails() {
               <button
                 className="enrol-button"
                 type="button"
-                onClick={() => {
-                  enrollInCourse(id);
-                  setIsEnrolled(true);
-                }}
+               onClick={async () => {
+  try {
+    const auth = getAuth();
+
+    if (!auth?.userId) {
+      console.error("User is not logged in.");
+      return;
+    }
+
+   const newEnrolment = await createEnrolment(auth.userId, id);
+
+await logActivity(
+  `${auth.name} enrolled in ${course.title}`
+);
+
+setIsEnrolled(true);
+  } catch (error) {
+    console.error("Unable to enrol in course:", error);
+  }
+}}
               >
                 Enrol Now
               </button>
@@ -105,7 +184,7 @@ function CourseDetails() {
         </div>
 
         <ol className="lesson-list">
-          {course.lessons.map((lesson, index) => {
+  {course.lessons?.map((lesson, index) => {
             const isCurrent = index === resumeIndex;
             const isDone = resumeIndex !== -1 && index < resumeIndex;
 
