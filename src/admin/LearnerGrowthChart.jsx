@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import { getLearnerGrowth } from "../utils/learnerGrowth";
 
 const TICK_STEP = 5;
@@ -14,12 +14,40 @@ function LearnerGrowthChart() {
   const [period, setPeriod] = useState("days");
   const [showTable, setShowTable] = useState(false);
 
-  const points = useMemo(() => getLearnerGrowth(period), [period]);
+
+  const [points, setPoints] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+  async function loadLearnerGrowth() {
+    try {
+      setLoading(true);
+
+      const data = await getLearnerGrowth(period);
+      setPoints(data);
+    } catch (error) {
+      console.error("Unable to load learner growth:", error);
+      setPoints([]);
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  loadLearnerGrowth();
+}, [period]);
+
+
   const activePeriod = periods.find((item) => item.id === period);
 
-  const total = points.reduce((sum, point) => sum + point.value, 0);
-  const busiestValue = Math.max(...points.map((point) => point.value));
-  const busiestIndex = points.findIndex((point) => point.value === busiestValue);
+ const total = points.reduce((sum, point) => sum + point.value, 0);
+
+const busiestValue = points.length
+  ? Math.max(...points.map((point) => point.value))
+  : 0;
+
+const busiestIndex = points.length
+  ? points.findIndex((point) => point.value === busiestValue)
+  : -1;
 
   const axisMax = Math.max(TICK_STEP, Math.ceil(busiestValue / TICK_STEP) * TICK_STEP);
   const ticks = [axisMax, axisMax / 2, 0];
@@ -64,7 +92,11 @@ function LearnerGrowthChart() {
         </div>
       </dl>
 
-      {showTable ? (
+    {loading ? (
+  <div className="activity-empty">
+    Loading learner growth...
+  </div>
+) : showTable ? (
         <div className="activity-table-wrap">
           <table className="activity-table">
             <caption className="visually-hidden">New learners for each {period.slice(0, -1)}, {activePeriod.unit}</caption>

@@ -8,6 +8,7 @@ import {
   addCourse,
   getCourses,
   updateCourse,
+  deleteCourse,
 } from "../services/courseService";
 import { getUsers } from "../services/userService";
 import useFocusTrap from "../utils/useFocusTrap";
@@ -41,17 +42,17 @@ const emptyForm = { title: "", description: "", category: categories[0], level: 
 function ManageCourses() {
   const [courses, setCourses] = useState([]);
   useEffect(() => {
-  async function loadCourses() {
-    try {
-      const courseData = await getCourses();
-      setCourses(courseData);
-    } catch (error) {
-      console.error("Unable to load courses:", error);
+    async function loadCourses() {
+      try {
+        const courseData = await getCourses();
+        setCourses(courseData);
+      } catch (error) {
+        console.error("Unable to load courses:", error);
+      }
     }
-  }
 
-  loadCourses();
-}, []);
+    loadCourses();
+  }, []);
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [editingId, setEditingId] = useState(null);
   const [form, setForm] = useState(emptyForm);
@@ -61,12 +62,7 @@ function ManageCourses() {
   const query = searchParams.get("q") ?? "";
   const [sort, setSort] = useState({ key: "title", direction: "asc" });
 
-  const enrollmentCounts = {};
-  getUsers().forEach((user) => {
-    user.enrolledCourseIds?.forEach((id) => {
-      enrollmentCounts[id] = (enrollmentCounts[id] ?? 0) + 1;
-    });
-  });
+  const enrollmentCounts = {};;
 
   const filteredCourses = courses.filter((course) => {
     const term = query.trim().toLowerCase();
@@ -132,6 +128,26 @@ function ManageCourses() {
   const updateField = (field) => (event) => {
     setForm((previous) => ({ ...previous, [field]: event.target.value }));
   };
+  const handleDelete = async (course) => {
+    const confirmed = window.confirm(
+      `Are you sure you want to delete "${course.title}"?`
+    );
+
+    if (!confirmed) return;
+
+    try {
+      await deleteCourse(course.id);
+
+      logActivity(`Course deleted: ${course.title}`);
+
+      const updatedCourses = await getCourses();
+      setCourses(updatedCourses);
+    } catch (error) {
+      console.error("Error deleting course:", error);
+
+      window.alert(error.message || "Unable to delete course.");
+    }
+  };
 
   const handleSubmit = async (event) => {
     event.preventDefault();
@@ -147,10 +163,22 @@ function ManageCourses() {
     }
 
     if (editingId) {
-      const course = updateCourse(editingId, form);
-      logActivity(`Course updated: ${course.title}`);
-      setCourses(getAllCourses());
-      closeForm();
+      try {
+        const course = await updateCourse(editingId, form);
+
+        logActivity(`Course updated: ${course.title}`);
+
+        const updatedCourses = await getCourses();
+        setCourses(updatedCourses);
+
+        closeForm();
+      } catch (error) {
+        console.error("Error updating course:", error);
+
+        setErrors({
+          submit: error.message || "Unable to update course.",
+        });
+      }
     } else {
       try {
         const course = await addCourse(form);
@@ -234,6 +262,13 @@ function ManageCourses() {
                   <td className="admin-table-actions">
                     <button type="button" className="secondary-button admin-status-button" onClick={() => openEditForm(course)}>
                       Edit
+                    </button>
+                    <button
+                      type="button"
+                      className="secondary-button admin-status-button"
+                      onClick={() => handleDelete(course)}
+                    >
+                      Delete
                     </button>
                   </td>
                 </tr>
@@ -327,10 +362,10 @@ function ManageCourses() {
                 error={errors.duration}
               />
               {errors.submit && (
-  <p className="error-message" role="alert">
-    {errors.submit}
-  </p>
-)}
+                <p className="error-message" role="alert">
+                  {errors.submit}
+                </p>
+              )}
               <button type="submit" className="login-button">
                 {editingId ? "Save Changes" : "Create Course"}
               </button>
