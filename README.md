@@ -4,7 +4,7 @@ A final-year university MVP for discovering, authoring and completing self-paced
 
 ## Features and roles
 
-- **ADMIN:** platform statistics; list/filter/edit users; activate/deactivate accounts; manage courses and visibility; inspect enrolled learners and progress.
+- **ADMIN:** platform statistics; add users with any supported role; list/filter/edit users; activate/deactivate accounts; manage courses and visibility; inspect enrolled learners and progress.
 - **EDUCATOR:** dashboard; create/edit/delete own courses; ordered modules and lessons; text, optional video URL and thumbnail URL; publish/unpublish; view learners and real completion statistics.
 - **LEARNER:** register/login; search/filter published courses; enrol once; view enrolments; resume the last accessed lesson; mark lessons complete/incomplete; persistent course and overall progress.
 - All roles can edit their profile and change their password. Theme and accessibility preferences stay on the device.
@@ -13,6 +13,32 @@ A final-year university MVP for discovering, authoring and completing self-paced
 - Embedded YouTube videos and playlists at course, module and lesson level. Educators paste links; no video storage, streaming service or API key is required.
 - Recommendations match enrolled categories, then rank by actual enrolments. Already-enrolled courses and unpublished courses are excluded.
 - Dashboards include seven-day completion activity, recent completions/enrolments, topic breakdowns, resume cards and educator/admin course performance. New accounts have honest empty states; demo accounts have stored demonstration activity.
+- Styled management workspaces: course cover cards, publishing filters, a sectioned course builder with live preview, learner rosters, and a searchable user directory with role/status badges and an accessible Add User dialog.
+
+### My Learning and My Progress
+
+**My Learning** is the learner's course library: resume the last lesson, search
+enrolled courses, filter All/In progress/Not started/Completed, start or revisit
+lessons, leave a course and discover recommendations.
+
+**My Progress** is a separate analytics page: overall lesson completion, completed
+courses, completions in the last seven days, a 28-day activity calendar, active
+learning days, course/module breakdowns, topic progress and recent completion
+history. It has no course-management controls or duplicate library cards. All
+numbers are calculated from the signed-in learner's stored enrolments and lesson
+completion records. Calendar days use UTC; completion dates use the browser's
+local display format. Completion is a record of learner activity, not a formal
+certificate or measurement of watched video time.
+
+### Admin-created accounts
+
+Open **Manage Users → Add user**, enter the person's name, email, role and initial
+password, then select **Create user**. The new account is active and can log in
+immediately; the administrator remains signed in to their own account. Passwords
+use the same hashing and validation as registration. Only administrators can use
+this endpoint, including when creating another administrator. Share the initial
+password directly with the intended user; there is no automated invitation/email
+delivery. The user can change it through account settings.
 
 ## Technology stack
 
@@ -109,7 +135,7 @@ All accounts use **`DemoPass123!`** (development only):
 | EDUCATOR | `educator@example.com` |
 | LEARNER | `learner@example.com` |
 
-The catalogue contains **12 courses, 35 modules and 73 lessons**, with original explanations, worked examples, practice labs, capstones, outcomes and prerequisites. Subjects include HTML/CSS, JavaScript, React, Node/Express, Python, SQL, Git, Linux, data analysis, algorithms, computer science and UI/UX. Companion videos are credited to their original creators; see [resource credits](COURSE_RESOURCES.md).
+The demo curriculum template provides **12 courses, 35 modules and 73 lessons**, with original explanations, worked examples, practice labs, capstones, outcomes and prerequisites. Existing educator edits are preserved, so live totals can differ. Subjects include HTML/CSS, JavaScript, React, Node/Express, Python, SQL, Git, Linux, data analysis, algorithms, computer science and UI/UX. Companion videos are credited to their original creators; see [resource credits](COURSE_RESOURCES.md).
 
 Additional demo educators: `priya@example.com`, `jordan@example.com`. Additional demo learners: `maya@example.com`, `oliver@example.com`, `aisha@example.com`, `lucas@example.com`, `emma@example.com`. All use the same development password above. Sam has six enrolments, including a completed Git course; other learners provide varied course progress for educator/admin demonstrations. These are real database fixtures, not hardcoded UI percentages. Existing progress is preserved when upgrading; individual totals can differ after normal use. Public registration permits LEARNER or EDUCATOR; administrators are seeded or managed by another admin.
 
@@ -153,7 +179,8 @@ Run `npm.cmd run migrate --prefix Backend`, then `npm.cmd run seed --prefix Back
 | `GET /api/dashboard` | Role-specific statistics |
 | `GET /api/dashboard/details` | Role-scoped activity, categories and recent registrations/enrolments |
 | `GET /api/courses/recommended` | Published recommendations, excluding the current user's enrolments |
-| `GET /api/users`; `PUT /api/users/:id`, `/users/:id/status` | Admin |
+| `GET/POST /api/users`; `PUT /api/users/:id`, `/users/:id/status` | Admin; creation accepts name/email/password/role |
+| `GET /api/learning/progress` | Learner-only activity, completion history and module analytics |
 | `GET /api/activity`, `/learner-growth` | Admin |
 
 ## Verification

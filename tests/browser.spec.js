@@ -87,13 +87,13 @@ test("admin dashboard, user roles, course management and refresh", async ({
     .getByRole("combobox", { name: "Role", exact: true })
     .selectOption("EDUCATOR");
   await expect(
-    page.getByRole("cell", { name: "educator@example.com" }),
+    page.getByRole("cell", { name: "educator@example.com", exact: true }),
   ).toBeVisible();
   await page
     .getByRole("combobox", { name: "Role", exact: true })
     .selectOption("LEARNER");
   await expect(
-    page.getByRole("cell", { name: "learner@example.com" }),
+    page.getByRole("cell", { name: "learner@example.com", exact: true }),
   ).toBeVisible();
   await page.getByRole("link", { name: "Manage Courses", exact: true }).click();
   await expect(
@@ -229,7 +229,7 @@ test("educator creates modules and lessons, publishes, learner enrols and persis
     await expect(card.getByText("100%", { exact: true })).toBeVisible();
     await page.goto("/educator/courses/" + courseId + "/learners");
     await expect(
-      page.getByRole("cell", { name: "learner@example.com" }),
+      page.getByRole("cell", { name: "learner@example.com", exact: true }),
     ).toBeVisible();
     await expect(page.getByRole("cell", { name: "100%" })).toBeVisible();
     await student.goto("/admin/users");
@@ -263,11 +263,14 @@ test("expanded catalogue, recommendations and detailed dashboards render on desk
     fullPage: true,
   });
   await page.goto("/courses");
-  await expect(page.locator(".market-card")).toHaveCount(12);
+  const catalogue = await (await page.request.get("/api/courses")).json();
+  await expect(page.locator(".market-card")).toHaveCount(catalogue.length);
   await page
     .getByRole("button", { name: "Developer Tools", exact: true })
     .click();
-  await expect(page.locator(".market-card")).toHaveCount(2);
+  await expect(page.locator(".market-card")).toHaveCount(
+    catalogue.filter((c) => c.category === "Developer Tools").length,
+  );
   await expect(page).toHaveURL(/category=Developer/);
   await page.getByRole("button", { name: "All topics", exact: true }).click();
   await page.getByRole("combobox", { name: "Sort by" }).selectOption("title");
