@@ -1,30 +1,5 @@
 import { useEffect, useRef, useState } from "react";
 import { Link, useParams, useSearchParams } from "react-router-dom";
-<<<<<<< HEAD
-import {
-  getCourseById,
-  isEnrolledInCourse,
-  enrollInCourse,
-} from "../services/courseService";
-
-function CourseDetails() {
-  const { id } = useParams();
-
-  const courseIdMap = {
-    "python-programming": 5,
-  };
-
-  const course = getCourseById(id);
-
-  const [isEnrolled, setIsEnrolled] = useState(() =>
-    isEnrolledInCourse(id)
-  );
-
-  const [lessons, setLessons] = useState([]);
-  const [lessonsLoading, setLessonsLoading] = useState(true);
-  const [lessonsError, setLessonsError] = useState("");
-
-=======
 import { getCourses } from "../services/courseService";
 import { getEnrolments, createEnrolment } from "../services/enrolmentService";
 import { logActivity } from "../services/activityService";
@@ -32,143 +7,102 @@ import { getAuth } from "../utils/auth";
 
 function CourseDetails() {
   const { id } = useParams();
-const [course, setCourse] = useState(null);
-const [courseLoading, setCourseLoading] = useState(true);
- const [isEnrolled, setIsEnrolled] = useState(false);
- const [enrolmentLoading, setEnrolmentLoading] = useState(true);
->>>>>>> origin/main
+  const [course, setCourse] = useState(null);
+  const [courseLoading, setCourseLoading] = useState(true);
+  const [isEnrolled, setIsEnrolled] = useState(false);
+  const [enrolmentLoading, setEnrolmentLoading] = useState(true);
+  const [completedLessons, setCompletedLessons] = useState([]);
+  const [completionLoading, setCompletionLoading] = useState(false);
   const resumeRef = useRef(null);
   const lessonSectionRef = useRef(null);
 
   const [searchParams, setSearchParams] = useSearchParams();
   const resumeLessonId = searchParams.get("lesson");
-<<<<<<< HEAD
-  const [completedLessons, setCompletedLessons] = useState([]);
-const [completionLoading, setCompletionLoading] = useState(false);
 
-const userId = localStorage.getItem("userId") || localStorage.getItem("user_id");
+  const lessons = course?.lessons ?? [];
+  const auth = getAuth();
+
+  const resumeIndex =
+    lessons.findIndex(
+      (lesson) => String(lesson.id) === String(resumeLessonId)
+    ) ?? -1;
 
   useEffect(() => {
-    const backendCourseId = courseIdMap[id];
-
-    const fetchLessons = async () => {
+    async function loadCourse() {
       try {
-        setLessonsLoading(true);
-        setLessonsError("");
+        const courses = await getCourses();
 
-        const response = await fetch(
-          `http://localhost:5000/api/lessons/course/${backendCourseId}`
+        const foundCourse = courses.find(
+          (item) => Number(item.id) === Number(id)
         );
 
-        if (!response.ok) {
-          throw new Error("Failed to fetch lessons");
+        setCourse(foundCourse || null);
+      } catch (error) {
+        console.error("Unable to load course:", error);
+        setCourse(null);
+      } finally {
+        setCourseLoading(false);
+      }
+    }
+
+    loadCourse();
+  }, [id]);
+
+  useEffect(() => {
+    async function checkEnrolment() {
+      try {
+        if (!auth?.userId) {
+          setIsEnrolled(false);
+          return;
         }
 
-        const data = await response.json();
-        setLessons(data);
+        const enrolments = await getEnrolments();
+
+        const enrolled = enrolments.some(
+          (enrolment) =>
+            Number(enrolment.user_id) === Number(auth.userId) &&
+            Number(enrolment.course_id) === Number(id)
+        );
+
+        setIsEnrolled(enrolled);
       } catch (error) {
-        console.error("Error fetching lessons:", error);
-        setLessonsError("Unable to load lessons.");
-      } finally {
-        setLessonsLoading(false);
-      }
-    };
-
-    if (id && backendCourseId) {
-      fetchLessons();
-    } else {
-      setLessons([]);
-      setLessonsLoading(false);
-    }
-  }, [id]);
-  useEffect(() => {
-  const backendCourseId = courseIdMap[id];
-
-  const fetchProgress = async () => {
-    if (!userId || !backendCourseId) {
-      setCompletedLessons([]);
-      return;
-    }
-
-    try {
-      const response = await fetch(
-        `http://localhost:5000/api/lessons/progress/${userId}/${backendCourseId}`
-      );
-
-      if (!response.ok) {
-        throw new Error("Failed to fetch lesson progress");
-      }
-
-      const data = await response.json();
-
-      setCompletedLessons(
-        data.map((item) => Number(item.lesson_id))
-      );
-    } catch (error) {
-      console.error("Error fetching lesson progress:", error);
-    }
-  };
-
-  fetchProgress();
-}, [id, userId]);
-
-  const resumeIndex = lessons.findIndex(
-    (lesson) => String(lesson.id) === String(resumeLessonId)
-  );
-=======
-  const resumeIndex =
-  course?.lessons?.findIndex((lesson) => lesson.id === resumeLessonId) ?? -1;
-  useEffect(() => {
-  async function loadCourse() {
-    try {
-      const courses = await getCourses();
-
-      const foundCourse = courses.find(
-        (item) => Number(item.id) === Number(id)
-      );
-
-      setCourse(foundCourse || null);
-    } catch (error) {
-      console.error("Unable to load course:", error);
-      setCourse(null);
-    } finally {
-      setCourseLoading(false);
-    }
-  }
-
-  loadCourse();
-}, [id]);
-  
-  useEffect(() => {
-  async function checkEnrolment() {
-    try {
-      const auth = getAuth();
-
-      if (!auth?.userId) {
+        console.error("Unable to check enrolment:", error);
         setIsEnrolled(false);
+      } finally {
+        setEnrolmentLoading(false);
+      }
+    }
+
+    checkEnrolment();
+  }, [id, auth?.userId]);
+
+  useEffect(() => {
+    async function fetchProgress() {
+      if (!auth?.userId || !id) {
+        setCompletedLessons([]);
         return;
       }
 
-      const enrolments = await getEnrolments();
+      try {
+        const response = await fetch(
+          `http://localhost:5000/api/lessons/progress/${auth.userId}/${id}`
+        );
 
-      const enrolled = enrolments.some(
-        (enrolment) =>
-          Number(enrolment.user_id) === Number(auth.userId) &&
-          Number(enrolment.course_id) === Number(id)
-      );
+        if (!response.ok) {
+          throw new Error("Failed to fetch lesson progress");
+        }
 
-      setIsEnrolled(enrolled);
-    } catch (error) {
-      console.error("Unable to check enrolment:", error);
-      setIsEnrolled(false);
-    } finally {
-      setEnrolmentLoading(false);
+        const data = await response.json();
+
+        setCompletedLessons(data.map((item) => Number(item.lesson_id)));
+      } catch (error) {
+        console.error("Error fetching lesson progress:", error);
+        setCompletedLessons([]);
+      }
     }
-  }
 
-  checkEnrolment();
-}, [id]);
->>>>>>> origin/main
+    fetchProgress();
+  }, [id, auth?.userId]);
 
   useEffect(() => {
     if (resumeIndex === -1) return undefined;
@@ -181,64 +115,61 @@ const userId = localStorage.getItem("userId") || localStorage.getItem("user_id")
 
     return () => cancelAnimationFrame(frame);
   }, [resumeIndex]);
-<<<<<<< HEAD
 
-const handleCompleteLesson = async (lessonId) => {
-  if (!userId) {
-    alert("Please log in to track your progress.");
-    return;
-  }
-
-  try {
-    setCompletionLoading(true);
-
-    const response = await fetch(
-      "http://localhost:5000/api/lessons/complete",
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          userId: Number(userId),
-          lessonId: Number(lessonId),
-        }),
-      }
-    );
-
-    const data = await response.json();
-
-    if (!response.ok) {
-      throw new Error(data.message || "Failed to complete lesson");
+  const handleCompleteLesson = async (lessonId) => {
+    if (!auth?.userId) {
+      alert("Please log in to track your progress.");
+      return;
     }
 
-    setCompletedLessons((previous) => {
-      if (previous.includes(Number(lessonId))) {
-        return previous;
+    try {
+      setCompletionLoading(true);
+
+      const response = await fetch(
+        "http://localhost:5000/api/lessons/complete",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            userId: Number(auth.userId),
+            lessonId: Number(lessonId),
+          }),
+        }
+      );
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.message || "Failed to complete lesson");
       }
 
-      return [...previous, Number(lessonId)];
-    });
+      setCompletedLessons((previous) => {
+        if (previous.includes(Number(lessonId))) {
+          return previous;
+        }
 
-    alert("Lesson completed!");
-  } catch (error) {
-    console.error("Error completing lesson:", error);
-    alert("Unable to mark lesson as completed.");
-  } finally {
-    setCompletionLoading(false);
-  }
-};
+        return [...previous, Number(lessonId)];
+      });
 
-=======
-  
+      alert("Lesson completed!");
+    } catch (error) {
+      console.error("Error completing lesson:", error);
+      alert("Unable to mark lesson as completed.");
+    } finally {
+      setCompletionLoading(false);
+    }
+  };
+
   if (courseLoading) {
-  return (
-    <section className="empty-state">
-      <p>Loading course...</p>
-    </section>
-  );
-}
->>>>>>> origin/main
+    return (
+      <section className="empty-state">
+        <p>Loading course...</p>
+      </section>
+    );
+  }
+
   if (!course) {
     return (
       <section className="empty-state course-not-found">
@@ -314,26 +245,25 @@ const handleCompleteLesson = async (lessonId) => {
               <button
                 className="enrol-button"
                 type="button"
-               onClick={async () => {
-  try {
-    const auth = getAuth();
+                disabled={enrolmentLoading}
+                onClick={async () => {
+                  try {
+                    if (!auth?.userId) {
+                      console.error("User is not logged in.");
+                      return;
+                    }
 
-    if (!auth?.userId) {
-      console.error("User is not logged in.");
-      return;
-    }
+                    await createEnrolment(auth.userId, id);
 
-   const newEnrolment = await createEnrolment(auth.userId, id);
+                    await logActivity(
+                      `${auth.name} enrolled in ${course.title}`
+                    );
 
-await logActivity(
-  `${auth.name} enrolled in ${course.title}`
-);
-
-setIsEnrolled(true);
-  } catch (error) {
-    console.error("Unable to enrol in course:", error);
-  }
-}}
+                    setIsEnrolled(true);
+                  } catch (error) {
+                    console.error("Unable to enrol in course:", error);
+                  }
+                }}
               >
                 Enrol Now
               </button>
@@ -379,19 +309,7 @@ setIsEnrolled(true);
         </div>
 
         <ol className="lesson-list">
-<<<<<<< HEAD
-          {lessonsLoading && (
-            <li>Loading lessons...</li>
-          )}
-
-          {lessonsError && (
-            <li>{lessonsError}</li>
-          )}
-
           {lessons.map((lesson, index) => {
-=======
-  {course.lessons?.map((lesson, index) => {
->>>>>>> origin/main
             const isCurrent = index === resumeIndex;
             const isDone = completedLessons.includes(Number(lesson.id));
 
@@ -446,20 +364,19 @@ setIsEnrolled(true);
                   <span className="lesson-duration">
                     {lesson.duration}
                   </span>
+                </button>
+
+                {isEnrolled && (
+                  <button
+                    type="button"
+                    className="lesson-complete-button"
+                    disabled={isDone || completionLoading}
+                    onClick={() => handleCompleteLesson(lesson.id)}
+                  >
+                    {isDone ? "✓ Completed" : "Mark Complete"}
                   </button>
-                  {isEnrolled && (
-  <button
-    type="button"
-    className="lesson-complete-button"
-    disabled={isDone || completionLoading}
-    onClick={() => handleCompleteLesson(lesson.id)}
-    >
-      
-     {isDone ? "✓ Completed" : "Mark Complete"}
-  </button>
-)}
-            
-             </li>
+                )}
+              </li>
             );
           })}
         </ol>
