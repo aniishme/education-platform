@@ -1,5 +1,6 @@
 const crypto = require("node:crypto");
 const db = require("./db");
+const { parseYouTubeUrl, isYouTubeHost } = require("../shared/youtube.mjs");
 const hash = (value) => crypto.createHash("sha256").update(value).digest("hex");
 const cookieOptions = {
   httpOnly: true,
@@ -100,7 +101,18 @@ function url(value) {
   }
   return text(value, "URL", 2000);
 }
+function video(value) {
+  const validated = url(value);
+  if (!validated) return "";
+  if (isYouTubeHost(validated)) {
+    const parsed = parseYouTubeUrl(validated);
+    if (!parsed) fail(400, "Enter a valid YouTube video or playlist link.");
+    return parsed.url;
+  }
+  return validated;
+}
 module.exports = {
+  video,
   hash,
   token,
   cookieOptions,

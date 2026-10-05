@@ -57,6 +57,7 @@ app.get("/api/dashboard", s.requireRole(), async (req, res) => {
     res.json(rows[0]);
   } else res.json({ message: "See your enrolments for course progress." });
 });
+app.use("/api", require("./routes/dashboard"));
 app.use("/api", require("./routes/admin"));
 app.use((req, res) => res.status(404).json({ message: "Resource not found." }));
 app.use((error, req, res, _next) => {

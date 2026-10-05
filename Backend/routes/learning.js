@@ -14,7 +14,7 @@ router.get("/enrolments", s.requireRole(), async (req, res) => {
         : "WHERE e.user_id=$1";
   }
   const { rows } = await db.query(
-    `SELECT e.*,c.title,c.title AS course_title,c.description,c.category,c.status,u.name AS user_name,u.email AS user_email,
+    `SELECT e.*,c.title,c.title AS course_title,c.description,c.category,c.status,c.image,c.subtitle,c.level,c.duration,u.name AS user_name,u.email AS user_email,
  (SELECT COUNT(*)::int FROM lessons l JOIN sections s ON s.id=l.section_id WHERE s.course_id=c.id) AS total_lessons,
  (SELECT COUNT(*)::int FROM lesson_progress p JOIN lessons l ON l.id=p.lesson_id JOIN sections s ON s.id=l.section_id WHERE p.user_id=e.user_id AND s.course_id=c.id) AS completed_lessons
  FROM enrolments e JOIN courses c ON c.id=e.course_id JOIN users u ON u.id=e.user_id ${filter}

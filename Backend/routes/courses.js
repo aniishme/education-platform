@@ -12,6 +12,10 @@ function courseValues(body) {
     s.text(body.duration || "", "Duration", 50, false),
     s.url(body.image),
     body.status || "DRAFT",
+    s.text(body.subtitle || "", "Subtitle", 240, false),
+    s.text(body.outcomes || "", "Learning outcomes", 10000, false),
+    s.text(body.requirements || "", "Requirements", 5000, false),
+    s.video(body.video_url),
   ];
 }
 function status(value) {
@@ -47,10 +51,37 @@ router.get("/", async (req, res) => {
     where.push(`c.category=$${args.length}`);
   }
   const { rows } = await db.query(
-    `SELECT c.*,u.name AS instructor FROM courses c JOIN users u ON u.id=c.educator_id ${where.length ? "WHERE " + where.join(" AND ") : ""} ORDER BY c.created_at DESC,c.id DESC`,
+    `SELECT c.*,u.name AS instructor,
+    (SELECT COUNT(*)::int FROM sections s WHERE s.course_id=c.id) AS total_sections,
+    (SELECT COUNT(*)::int FROM lessons l JOIN sections s ON s.id=l.section_id WHERE s.course_id=c.id) AS total_lessons,
+    (SELECT COUNT(*)::int FROM enrolments e WHERE e.course_id=c.id) AS enrolment_count
+    FROM courses c JOIN users u ON u.id=c.educator_id ${where.length ? "WHERE " + where.join(" AND ") : ""} ORDER BY c.created_at DESC,c.id DESC`,
     args,
   );
   res.json(rows);
+});
+router.get("/recommended", async (req, res) => {
+  const { rows } = await db.query(
+    `SELECT c.*,u.name AS instructor,
+    (SELECT COUNT(*)::int FROM sections s WHERE s.course_id=c.id) AS total_sections,
+    (SELECT COUNT(*)::int FROM lessons l JOIN sections s ON s.id=l.section_id WHERE s.course_id=c.id) AS total_lessons,
+    (SELECT COUNT(*)::int FROM enrolments e WHERE e.course_id=c.id) AS enrolment_count,
+    EXISTS(SELECT 1 FROM enrolments e JOIN courses ec ON ec.id=e.course_id WHERE e.user_id=$1 AND ec.category=c.category) AS category_match
+    FROM courses c JOIN users u ON u.id=c.educator_id WHERE c.status='PUBLISHED'
+    AND NOT EXISTS(SELECT 1 FROM enrolments e WHERE e.user_id=$1 AND e.course_id=c.id)
+    ORDER BY category_match DESC,enrolment_count DESC,c.id DESC LIMIT 6`,
+    [req.user?.id || null],
+  );
+  res.json(
+    rows.map((c) => ({
+      ...c,
+      recommendation_reason: c.category_match
+        ? `Because you're learning ${c.category}`
+        : c.enrolment_count
+          ? "Popular with learners"
+          : "Explore a new skill",
+    })),
+  );
 });
 router.post("/", managers, async (req, res) => {
   const values = courseValues(req.body);
@@ -58,7 +89,7 @@ router.post("/", managers, async (req, res) => {
   if (values[6] !== "DRAFT")
     s.fail(400, "Create a draft first, then add lessons and publish.");
   const { rows } = await db.query(
-    `INSERT INTO courses(title,description,category,level,duration,image,status,educator_id) VALUES($1,$2,$3,$4,$5,$6,$7,$8) RETURNING *`,
+    `INSERT INTO courses(title,description,category,level,duration,image,status,subtitle,outcomes,requirements,video_url,educator_id) VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12) RETURNING *`,
     [...values, req.user.id],
   );
   res.status(201).json({ course: rows[0] });
@@ -70,7 +101,7 @@ router.get("/:id", async (req, res) => {
     [course.id],
   );
   const { rows: lessons } = await db.query(
-    "SELECT l.id,l.section_id,l.title,l.position FROM lessons l JOIN sections s ON s.id=l.section_id WHERE s.course_id=$1 ORDER BY s.position,s.id,l.position,l.id",
+    "SELECT l.id,l.section_id,l.title,l.position,l.duration_minutes,(l.video_url<>'') AS has_video FROM lessons l JOIN sections s ON s.id=l.section_id WHERE s.course_id=$1 ORDER BY s.position,s.id,l.position,l.id",
     [course.id],
   );
   const enrolment = req.user
@@ -96,7 +127,7 @@ router.put("/:id", managers, async (req, res) => {
   status(values[6]);
   await publishCheck(course.id, values[6]);
   const { rows } = await db.query(
-    "UPDATE courses SET title=$1,description=$2,category=$3,level=$4,duration=$5,image=$6,status=$7,updated_at=NOW() WHERE id=$8 RETURNING *",
+    "UPDATE courses SET title=$1,description=$2,category=$3,level=$4,duration=$5,image=$6,status=$7,subtitle=$8,outcomes=$9,requirements=$10,video_url=$11,updated_at=NOW() WHERE id=$12 RETURNING *",
     [...values, course.id],
   );
   res.json({ course: rows[0] });
@@ -109,11 +140,12 @@ router.delete("/:id", managers, async (req, res) => {
 router.post("/:id/sections", managers, async (req, res) => {
   const course = await access.course(req, req.params.id, true);
   const { rows } = await db.query(
-    "INSERT INTO sections(course_id,title,position) VALUES($1,$2,$3) RETURNING *",
+    "INSERT INTO sections(course_id,title,position,video_url) VALUES($1,$2,$3,$4) RETURNING *",
     [
       course.id,
       s.text(req.body.title, "Module title"),
       position(req.body.position),
+      s.video(req.body.video_url),
     ],
   );
   res.status(201).json(rows[0]);
@@ -130,10 +162,11 @@ function position(value = 0) {
 router.put("/sections/:id", managers, async (req, res) => {
   const section = await access.section(req, req.params.id);
   const { rows } = await db.query(
-    "UPDATE sections SET title=$1,position=$2 WHERE id=$3 RETURNING *",
+    "UPDATE sections SET title=$1,position=$2,video_url=$3 WHERE id=$4 RETURNING *",
     [
       s.text(req.body.title, "Module title"),
       position(req.body.position),
+      s.video(req.body.video_url),
       section.id,
     ],
   );
@@ -147,7 +180,7 @@ router.delete("/sections/:id", managers, async (req, res) => {
 router.post("/sections/:id/lessons", managers, async (req, res) => {
   const section = await access.section(req, req.params.id);
   const { rows } = await db.query(
-    "INSERT INTO lessons(section_id,title,description,content,video_url,position) VALUES($1,$2,$3,$4,$5,$6) RETURNING *",
+    "INSERT INTO lessons(section_id,title,description,content,video_url,position,duration_minutes) VALUES($1,$2,$3,$4,$5,$6,$7) RETURNING *",
     [section.id, ...lessonValues(req.body)],
   );
   res.status(201).json(rows[0]);
@@ -157,14 +190,15 @@ function lessonValues(body) {
     s.text(body.title, "Lesson title"),
     s.text(body.description || "", "Description", 20000, false),
     s.text(body.content || "", "Content", 100000, false),
-    s.url(body.video_url),
+    s.video(body.video_url),
     position(body.position),
+    duration(body.duration_minutes),
   ];
 }
 router.put("/lessons/:id", managers, async (req, res) => {
   const lesson = await access.lesson(req, req.params.id, true);
   const { rows } = await db.query(
-    "UPDATE lessons SET title=$1,description=$2,content=$3,video_url=$4,position=$5 WHERE id=$6 RETURNING *",
+    "UPDATE lessons SET title=$1,description=$2,content=$3,video_url=$4,position=$5,duration_minutes=$6 WHERE id=$7 RETURNING *",
     [...lessonValues(req.body), lesson.id],
   );
   res.json(rows[0]);
@@ -192,5 +226,14 @@ function progress(row) {
       ? Math.round((100 * row.completed_lessons) / row.total_lessons)
       : 0,
   };
+}
+function duration(value = 15) {
+  if (
+    !Number.isInteger(Number(value)) ||
+    Number(value) < 0 ||
+    Number(value) > 1440
+  )
+    s.fail(400, "Lesson duration must be between 0 and 1440 minutes.");
+  return Number(value);
 }
 module.exports = { router, progress };

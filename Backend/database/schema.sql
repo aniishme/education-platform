@@ -45,3 +45,14 @@ CREATE TABLE IF NOT EXISTS lesson_progress (
 CREATE TABLE IF NOT EXISTS activity (
  id SERIAL PRIMARY KEY, message VARCHAR(255) NOT NULL, created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
+
+-- Additive upgrades preserve existing courses, lessons, enrolments and progress.
+ALTER TABLE courses ADD COLUMN IF NOT EXISTS subtitle VARCHAR(240) NOT NULL DEFAULT '';
+ALTER TABLE courses ADD COLUMN IF NOT EXISTS outcomes TEXT NOT NULL DEFAULT '';
+ALTER TABLE courses ADD COLUMN IF NOT EXISTS requirements TEXT NOT NULL DEFAULT '';
+ALTER TABLE courses ADD COLUMN IF NOT EXISTS video_url TEXT NOT NULL DEFAULT '';
+ALTER TABLE courses ADD COLUMN IF NOT EXISTS resource_credit TEXT NOT NULL DEFAULT '';
+ALTER TABLE courses ADD COLUMN IF NOT EXISTS demo_key TEXT UNIQUE;
+ALTER TABLE sections ADD COLUMN IF NOT EXISTS video_url TEXT NOT NULL DEFAULT '';
+ALTER TABLE lessons ADD COLUMN IF NOT EXISTS duration_minutes INTEGER NOT NULL DEFAULT 15 CHECK (duration_minutes BETWEEN 0 AND 1440);
+CREATE INDEX IF NOT EXISTS lesson_progress_lesson_idx ON lesson_progress(lesson_id);
