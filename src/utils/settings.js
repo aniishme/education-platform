@@ -31,22 +31,45 @@ const readStorage = (key) => {
 // merge saved values over the defaults, dropping anything that isn't valid
 function normalise(saved) {
   const value = saved && typeof saved === "object" ? saved : {};
-  const notifications = value.notifications && typeof value.notifications === "object" ? value.notifications : {};
+  const notifications =
+    value.notifications && typeof value.notifications === "object"
+      ? value.notifications
+      : {};
 
   return {
     theme: THEMES.includes(value.theme) ? value.theme : defaultSettings.theme,
-    textSize: TEXT_SIZES.includes(value.textSize) ? value.textSize : defaultSettings.textSize,
-    highContrast: typeof value.highContrast === "boolean" ? value.highContrast : defaultSettings.highContrast,
-    dyslexiaFont: typeof value.dyslexiaFont === "boolean" ? value.dyslexiaFont : defaultSettings.dyslexiaFont,
-    reduceMotion: typeof value.reduceMotion === "boolean" ? value.reduceMotion : defaultSettings.reduceMotion,
-    focusOutlines: typeof value.focusOutlines === "boolean" ? value.focusOutlines : defaultSettings.focusOutlines,
+    textSize: TEXT_SIZES.includes(value.textSize)
+      ? value.textSize
+      : defaultSettings.textSize,
+    highContrast:
+      typeof value.highContrast === "boolean"
+        ? value.highContrast
+        : defaultSettings.highContrast,
+    dyslexiaFont:
+      typeof value.dyslexiaFont === "boolean"
+        ? value.dyslexiaFont
+        : defaultSettings.dyslexiaFont,
+    reduceMotion:
+      typeof value.reduceMotion === "boolean"
+        ? value.reduceMotion
+        : defaultSettings.reduceMotion,
+    focusOutlines:
+      typeof value.focusOutlines === "boolean"
+        ? value.focusOutlines
+        : defaultSettings.focusOutlines,
     notifications: {
       deadlines:
-        typeof notifications.deadlines === "boolean" ? notifications.deadlines : defaultSettings.notifications.deadlines,
+        typeof notifications.deadlines === "boolean"
+          ? notifications.deadlines
+          : defaultSettings.notifications.deadlines,
       newLessons:
-        typeof notifications.newLessons === "boolean" ? notifications.newLessons : defaultSettings.notifications.newLessons,
+        typeof notifications.newLessons === "boolean"
+          ? notifications.newLessons
+          : defaultSettings.notifications.newLessons,
       weeklyEmail:
-        typeof notifications.weeklyEmail === "boolean" ? notifications.weeklyEmail : defaultSettings.notifications.weeklyEmail,
+        typeof notifications.weeklyEmail === "boolean"
+          ? notifications.weeklyEmail
+          : defaultSettings.notifications.weeklyEmail,
     },
   };
 }
@@ -71,7 +94,10 @@ const listeners = new Set();
 
 const notify = () => listeners.forEach((listener) => listener());
 
-const systemDarkQuery = typeof window !== "undefined" && window.matchMedia ? window.matchMedia("(prefers-color-scheme: dark)") : null;
+const systemDarkQuery =
+  typeof window !== "undefined" && window.matchMedia
+    ? window.matchMedia("(prefers-color-scheme: dark)")
+    : null;
 
 // "system" follows the operating system's current preference
 export function resolveTheme(theme) {

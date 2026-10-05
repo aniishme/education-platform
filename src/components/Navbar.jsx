@@ -1,4 +1,3 @@
-import { useState } from "react";
 import { NavLink, useNavigate } from "react-router-dom";
 import logo from "../assets/studyflow-favicon.svg";
 import { getRole, isLoggedIn, logout } from "../utils/auth";
@@ -27,15 +26,29 @@ const adminNavItems = [
 ];
 
 function Navbar() {
-  const [authed, setAuthed] = useState(isLoggedIn);
+  const authed = isLoggedIn();
   const navigate = useNavigate();
 
   const handleLogout = async () => {
-    try {await logout();setAuthed(false);navigate("/login", { replace: true });}
-    catch(error){window.alert(error.message);}
+    try {
+      await logout();
+      navigate("/login", { replace: true });
+    } catch (error) {
+      window.alert(error.message);
+    }
   };
 
-  const navigationItems = !isLoggedIn() ? guestNavItems : getRole() === "ADMIN" ? adminNavItems : getRole()==='EDUCATOR' ? [{to:'/',label:'Dashboard',end:true},{to:'/educator/courses',label:'My Courses'},{to:'/courses',label:'Catalogue'}] : memberNavItems;
+  const navigationItems = !isLoggedIn()
+    ? guestNavItems
+    : getRole() === "ADMIN"
+      ? adminNavItems
+      : getRole() === "EDUCATOR"
+        ? [
+            { to: "/", label: "Dashboard", end: true },
+            { to: "/educator/courses", label: "My Courses" },
+            { to: "/courses", label: "Catalogue" },
+          ]
+        : memberNavItems;
 
   return (
     <header className="site-header">
@@ -63,13 +76,17 @@ function Navbar() {
             <>
               <NavLink
                 to="/login"
-                className={({ isActive }) => `nav-link${isActive ? " active" : ""}`}
+                className={({ isActive }) =>
+                  `nav-link${isActive ? " active" : ""}`
+                }
               >
                 Login
               </NavLink>
               <NavLink
                 to="/signup"
-                className={({ isActive }) => `nav-link${isActive ? " active" : ""}`}
+                className={({ isActive }) =>
+                  `nav-link${isActive ? " active" : ""}`
+                }
               >
                 Sign Up
               </NavLink>

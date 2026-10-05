@@ -23,8 +23,8 @@ function About() {
         <p className="eyebrow">About us</p>
         <h1 id="about-title">Learning that fits your schedule</h1>
         <p>
-          StudyFlow is an education platform that helps you find courses, follow your lessons
-          and keep track of your progress in one place.
+          StudyFlow is an education platform that helps you find courses, follow
+          your lessons and keep track of your progress in one place.
         </p>
       </div>
 

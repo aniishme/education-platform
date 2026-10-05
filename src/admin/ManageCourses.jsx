@@ -1,1 +1,1 @@
-export { default } from '../pages/CourseManagement';
+export { default } from "../pages/CourseManagement";

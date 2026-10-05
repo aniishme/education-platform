@@ -55,7 +55,8 @@ html[data-text-size="xlarge"] {
 html[data-font="dyslexia"] *,
 html[data-font="dyslexia"] *::before,
 html[data-font="dyslexia"] *::after {
-  font-family: "OpenDyslexic", "Lexend", "Comic Sans MS", Verdana, sans-serif !important;
+  font-family:
+    "OpenDyslexic", "Lexend", "Comic Sans MS", Verdana, sans-serif !important;
   letter-spacing: 0.02em;
   word-spacing: 0.06em;
 }

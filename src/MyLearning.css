@@ -153,7 +153,9 @@
   font-size: 0.875rem;
   font-weight: 600;
   text-decoration: none;
-  transition: background 0.15s ease, transform 0.12s ease;
+  transition:
+    background 0.15s ease,
+    transform 0.12s ease;
 }
 
 .learning-leave-button {

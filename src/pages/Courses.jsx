@@ -13,7 +13,8 @@ function Courses() {
   // the search term lives in the URL (?q=) so the navbar search can set it
   const [searchParams, setSearchParams] = useSearchParams();
   const search = searchParams.get("q") ?? "";
-  const setSearch = (value) => setSearchParams(value ? { q: value } : {}, { replace: true });
+  const setSearch = (value) =>
+    setSearchParams(value ? { q: value } : {}, { replace: true });
   const [category, setCategory] = useState("");
   const [level, setLevel] = useState("");
   const [isLoading, setIsLoading] = useState(true);
@@ -109,7 +110,8 @@ function Courses() {
       ) : (
         <>
           <p className="result-count" aria-live="polite">
-            {filteredCourses.length} {filteredCourses.length === 1 ? "course" : "courses"} found
+            {filteredCourses.length}{" "}
+            {filteredCourses.length === 1 ? "course" : "courses"} found
           </p>
 
           {filteredCourses.length > 0 ? (

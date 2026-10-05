@@ -92,7 +92,9 @@
   color: #fff;
   font-weight: 600;
   cursor: pointer;
-  transition: background 0.15s ease, transform 0.12s ease;
+  transition:
+    background 0.15s ease,
+    transform 0.12s ease;
 }
 
 .profile-edit-button:hover {

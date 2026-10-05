@@ -50,7 +50,10 @@
   display: grid;
   place-items: center;
   border-radius: 50%;
-  background: conic-gradient(var(--accent) var(--progress-value), var(--track) 0);
+  background: conic-gradient(
+    var(--accent) var(--progress-value),
+    var(--track) 0
+  );
 }
 
 .progress-total-visual > div {

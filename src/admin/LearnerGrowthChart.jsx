@@ -14,46 +14,50 @@ function LearnerGrowthChart() {
   const [period, setPeriod] = useState("days");
   const [showTable, setShowTable] = useState(false);
 
-
   const [points, setPoints] = useState([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-  async function loadLearnerGrowth() {
-    try {
-      setLoading(true);
+    async function loadLearnerGrowth() {
+      try {
+        setLoading(true);
 
-      const data = await getLearnerGrowth(period);
-      setPoints(data);
-    } catch (error) {
-      console.error("Unable to load learner growth:", error);
-      setPoints([]);
-    } finally {
-      setLoading(false);
+        const data = await getLearnerGrowth(period);
+        setPoints(data);
+      } catch (error) {
+        console.error("Unable to load learner growth:", error);
+        setPoints([]);
+      } finally {
+        setLoading(false);
+      }
     }
-  }
 
-  loadLearnerGrowth();
-}, [period]);
-
+    loadLearnerGrowth();
+  }, [period]);
 
   const activePeriod = periods.find((item) => item.id === period);
 
- const total = points.reduce((sum, point) => sum + point.value, 0);
+  const total = points.reduce((sum, point) => sum + point.value, 0);
 
-const busiestValue = points.length
-  ? Math.max(...points.map((point) => point.value))
-  : 0;
+  const busiestValue = points.length
+    ? Math.max(...points.map((point) => point.value))
+    : 0;
 
-const busiestIndex = points.length
-  ? points.findIndex((point) => point.value === busiestValue)
-  : -1;
+  const busiestIndex = points.length
+    ? points.findIndex((point) => point.value === busiestValue)
+    : -1;
 
-  const axisMax = Math.max(TICK_STEP, Math.ceil(busiestValue / TICK_STEP) * TICK_STEP);
+  const axisMax = Math.max(
+    TICK_STEP,
+    Math.ceil(busiestValue / TICK_STEP) * TICK_STEP,
+  );
   const ticks = [axisMax, axisMax / 2, 0];
 
   return (
-    <section className="dash-card activity admin-growth-card" aria-labelledby="growth-heading">
+    <section
+      className="dash-card activity admin-growth-card"
+      aria-labelledby="growth-heading"
+    >
       <div className="dash-head">
         <div>
           <p className="dash-kicker">Learner growth</p>
@@ -71,7 +75,11 @@ const busiestIndex = points.length
         </button>
       </div>
 
-      <div className="growth-period-toggle" role="group" aria-label="Time range">
+      <div
+        className="growth-period-toggle"
+        role="group"
+        aria-label="Time range"
+      >
         {periods.map((item) => (
           <button
             key={item.id}
@@ -92,36 +100,51 @@ const busiestIndex = points.length
         </div>
       </dl>
 
-    {loading ? (
-  <div className="activity-empty">
-    Loading learner growth...
-  </div>
-) : showTable ? (
+      {loading ? (
+        <div className="activity-empty">Loading learner growth...</div>
+      ) : showTable ? (
         <div className="activity-table-wrap">
           <table className="activity-table">
-            <caption className="visually-hidden">New learners for each {period.slice(0, -1)}, {activePeriod.unit}</caption>
+            <caption className="visually-hidden">
+              New learners for each {period.slice(0, -1)}, {activePeriod.unit}
+            </caption>
             <thead>
               <tr>
-                <th scope="col">{period === "days" ? "Day" : period === "months" ? "Month" : "Year"}</th>
+                <th scope="col">
+                  {period === "days"
+                    ? "Day"
+                    : period === "months"
+                      ? "Month"
+                      : "Year"}
+                </th>
                 <th scope="col">New learners</th>
                 <th scope="col">
-                  <span className="visually-hidden">Compared with the busiest {period.slice(0, -1)}</span>
+                  <span className="visually-hidden">
+                    Compared with the busiest {period.slice(0, -1)}
+                  </span>
                 </th>
               </tr>
             </thead>
             <tbody>
               {points.map((point) => (
-                <tr key={point.longLabel} className={point.isCurrent ? "today" : undefined}>
+                <tr
+                  key={point.longLabel}
+                  className={point.isCurrent ? "today" : undefined}
+                >
                   <th scope="row">
                     <span className="table-day">
                       {point.longLabel}
-                      {point.isCurrent && <span className="table-today">Now</span>}
+                      {point.isCurrent && (
+                        <span className="table-today">Now</span>
+                      )}
                     </span>
                   </th>
                   <td className="table-time">{point.value}</td>
                   <td className="table-share" aria-hidden="true">
                     <span className="table-share-track">
-                      <span style={{ width: `${(point.value / axisMax) * 100}%` }} />
+                      <span
+                        style={{ width: `${(point.value / axisMax) * 100}%` }}
+                      />
                     </span>
                   </td>
                 </tr>
@@ -137,7 +160,11 @@ const busiestIndex = points.length
           </table>
         </div>
       ) : (
-        <div className="activity-chart" role="group" aria-label={`New learners per ${period.slice(0, -1)}, ${activePeriod.unit}`}>
+        <div
+          className="activity-chart"
+          role="group"
+          aria-label={`New learners per ${period.slice(0, -1)}, ${activePeriod.unit}`}
+        >
           <div className="activity-gridlines" aria-hidden="true">
             {ticks.map((tick) => (
               <div
@@ -152,7 +179,9 @@ const busiestIndex = points.length
 
           <div
             className="activity-columns growth-columns"
-            style={{ gridTemplateColumns: `repeat(${points.length}, minmax(0, 1fr))` }}
+            style={{
+              gridTemplateColumns: `repeat(${points.length}, minmax(0, 1fr))`,
+            }}
           >
             {points.map((point, index) => {
               const height = (point.value / axisMax) * 100;
@@ -167,25 +196,39 @@ const busiestIndex = points.length
                 >
                   <div className="activity-bar-area">
                     {point.value > 0 ? (
-                      <span className="activity-bar" style={{ height: `${height}%` }} />
+                      <span
+                        className="activity-bar"
+                        style={{ height: `${height}%` }}
+                      />
                     ) : (
                       <span className="activity-rest" />
                     )}
 
                     {index === busiestIndex && busiestValue > 0 && (
-                      <span className="activity-value" style={{ bottom: `calc(${height}% + 6px)` }}>
+                      <span
+                        className="activity-value"
+                        style={{ bottom: `calc(${height}% + 6px)` }}
+                      >
                         {point.value}
                       </span>
                     )}
 
-                    <span className="activity-tip" style={{ bottom: `calc(${height}% + 12px)` }}>
+                    <span
+                      className="activity-tip"
+                      style={{ bottom: `calc(${height}% + 12px)` }}
+                    >
                       <strong>
-                        {point.value} new {point.value === 1 ? "learner" : "learners"}
+                        {point.value} new{" "}
+                        {point.value === 1 ? "learner" : "learners"}
                       </strong>
                       <span>{point.longLabel}</span>
                     </span>
                   </div>
-                  <span className={`activity-day${point.isCurrent ? " today" : ""}`}>{point.shortLabel}</span>
+                  <span
+                    className={`activity-day${point.isCurrent ? " today" : ""}`}
+                  >
+                    {point.shortLabel}
+                  </span>
                 </div>
               );
             })}

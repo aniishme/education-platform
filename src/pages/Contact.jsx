@@ -56,14 +56,21 @@ function Contact() {
       <div className="info-heading">
         <p className="eyebrow">Contact</p>
         <h1 id="contact-title">Get in touch</h1>
-        <p>Have a question about a course or your account? Send us a message.</p>
+        <p>
+          Have a question about a course or your account? Send us a message.
+        </p>
       </div>
 
       <div className="contact-layout">
-        <form className="info-card contact-form" onSubmit={handleSubmit} noValidate>
+        <form
+          className="info-card contact-form"
+          onSubmit={handleSubmit}
+          noValidate
+        >
           {sent && (
             <p className="contact-success" role="status">
-              Thanks for reaching out. Your message has been sent.
+              Your demo message is valid. This university demonstration does not
+              send messages.
             </p>
           )}
 
@@ -100,7 +107,9 @@ function Contact() {
                 setSent(false);
                 clearError("email");
               }}
-              aria-describedby={errors.email ? "contact-email-error" : undefined}
+              aria-describedby={
+                errors.email ? "contact-email-error" : undefined
+              }
             />
             {errors.email && (
               <p id="contact-email-error" className="error-message">
@@ -121,7 +130,9 @@ function Contact() {
                 setSent(false);
                 clearError("message");
               }}
-              aria-describedby={errors.message ? "contact-message-error" : undefined}
+              aria-describedby={
+                errors.message ? "contact-message-error" : undefined
+              }
             />
             {errors.message && (
               <p id="contact-message-error" className="error-message">

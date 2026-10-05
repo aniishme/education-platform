@@ -1,31 +1,10 @@
 import { Link } from "react-router-dom";
-import { useEffect, useState } from 'react';
-import { getCourses } from '../services/courseService';
+import { useEffect, useState } from "react";
+import { getCourses } from "../services/courseService";
 import AdminDashboard from "../admin/AdminDashboard";
 import FeaturedCourseCard from "../components/FeaturedCourseCard";
 import { getRole, isLoggedIn } from "../utils/auth";
 import StudentHome from "./StudentHome";
-
-const sampleCourses = [
-  {
-    id: "react-fundamentals",
-    title: "React Fundamentals",
-    category: "Web Development",
-    description: "Build a strong foundation in components, props, and state.",
-  },
-  {
-    id: "cybersecurity-essentials",
-    title: "Cybersecurity Essentials",
-    category: "Cybersecurity",
-    description: "Learn practical ways to recognise and reduce digital risks.",
-  },
-  {
-    id: "ui-ux-design-basics",
-    title: "UI/UX Design Basics",
-    category: "UI/UX",
-    description: "Create clear, accessible interfaces centred on user needs.",
-  },
-];
 
 const categories = [
   "Web Development",
@@ -39,8 +18,18 @@ const categories = [
 ];
 
 function GuestHome() {
-  const [featuredCourses,setFeaturedCourses]=useState([]);
-  useEffect(()=>{let current=true;getCourses().then(courses=>{if(current)setFeaturedCourses(courses.slice(0,3));}).catch(()=>{});return()=>{current=false;};},[]);
+  const [featuredCourses, setFeaturedCourses] = useState([]);
+  useEffect(() => {
+    let current = true;
+    getCourses()
+      .then((courses) => {
+        if (current) setFeaturedCourses(courses.slice(0, 3));
+      })
+      .catch(() => {});
+    return () => {
+      current = false;
+    };
+  }, []);
   return (
     <>
       <section className="hero-section">
@@ -80,7 +69,10 @@ function GuestHome() {
         </div>
       </section>
 
-      <section className="home-section category-section" aria-labelledby="categories-heading">
+      <section
+        className="home-section category-section"
+        aria-labelledby="categories-heading"
+      >
         <div className="section-heading">
           <div>
             <p className="eyebrow">Find your direction</p>

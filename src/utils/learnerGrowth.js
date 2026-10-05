@@ -1,7 +1,7 @@
-import { api } from '../services/api';
+import { api } from "../services/api";
 
 export async function getLearnerGrowth(period) {
-  const users = await api('/learner-growth');
+  const users = await api("/learner-growth");
 
   const students = users.map((user) => ({
     createdAt: new Date(user.created_at),
@@ -62,11 +62,7 @@ function buildMonths(students) {
   const points = [];
 
   for (let monthsAgo = 5; monthsAgo >= 0; monthsAgo--) {
-    const date = new Date(
-      today.getFullYear(),
-      today.getMonth() - monthsAgo,
-      1
-    );
+    const date = new Date(today.getFullYear(), today.getMonth() - monthsAgo, 1);
 
     const value = students.filter((student) => {
       const created = new Date(student.createdAt);

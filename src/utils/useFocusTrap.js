@@ -1,6 +1,7 @@
 import { useEffect, useRef } from "react";
 
-const FOCUSABLE = 'a[href], button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])';
+const FOCUSABLE =
+  'a[href], button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])';
 
 // For modal dialogs: moves focus into the dialog, keeps Tab inside it,
 // closes on Escape, and puts focus back where it was when the dialog closes.

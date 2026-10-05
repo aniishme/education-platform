@@ -3,7 +3,6 @@ import { Link } from "react-router-dom";
 import bellIcon from "../assets/notification.png";
 import { getRecentActivity, timeAgo } from "../services/activityService";
 import { getRole } from "../utils/auth";
-import { useSettings } from "../utils/settings";
 import useDismiss from "../utils/useDismiss";
 
 const READ_KEY = "studyflowReadNotifications";
@@ -11,31 +10,7 @@ const ADMIN_READ_KEY = "studyflowReadAdminNotifications";
 
 // sample notifications until there is a real notifications service
 // `type` ties an item to a switch in Settings → Notifications; items without one always show
-const allNotifications = [
-  {
-    id: "react-deadline",
-    type: "deadlines",
-    title: "Lesson due soon",
-    text: "Events and Forms in React Fundamentals is due on Friday.",
-    time: "2 hours ago",
-    to: "/my-learning",
-  },
-  {
-    id: "cyber-lesson",
-    type: "newLessons",
-    title: "New lesson available",
-    text: "A new lesson was added to Cybersecurity Essentials.",
-    time: "Yesterday",
-    to: "/courses/cybersecurity-essentials",
-  },
-  {
-    id: "uiux-complete",
-    title: "Course completed",
-    text: "Congratulations! You completed UI/UX Design Basics.",
-    time: "3 days ago",
-    to: "/progress",
-  },
-];
+const allNotifications = [];
 
 const getReadIds = (key) => {
   try {
@@ -55,43 +30,42 @@ const saveReadIds = (key, ids) => {
 };
 
 function NotificationMenu() {
-  const isAdmin = getRole() === "admin";
+  const isAdmin = getRole() === "ADMIN";
   const readKey = isAdmin ? ADMIN_READ_KEY : READ_KEY;
 
   const [isOpen, setIsOpen] = useState(false);
-const [readIds, setReadIds] = useState(() => getReadIds(readKey));
-const [activities, setActivities] = useState([]);
+  const [readIds, setReadIds] = useState(() => getReadIds(readKey));
+  const [activities, setActivities] = useState([]);
 
-useEffect(() => {
-  if (!isAdmin) return;
+  useEffect(() => {
+    if (!isAdmin) return;
 
-  async function loadActivities() {
-    try {
-      const activityData = await getRecentActivity();
-      setActivities(activityData);
-    } catch (error) {
-      console.error("Unable to load activities:", error);
+    async function loadActivities() {
+      try {
+        const activityData = await getRecentActivity();
+        setActivities(activityData);
+      } catch (error) {
+        console.error("Unable to load activities:", error);
+      }
     }
-  }
 
-  loadActivities();
-}, [isAdmin]);
-  const [settings] = useSettings();
+    loadActivities();
+  }, [isAdmin]);
   const menuRef = useRef(null);
   const close = useCallback(() => setIsOpen(false), []);
   useDismiss(menuRef, isOpen, close);
 
- const notifications = isAdmin
-  ? activities.map((item) => ({
-      id: item.id,
-      title: item.message,
-      time: timeAgo(item.created_at),
-      to: "/",
-    }))
-  : allNotifications.filter(
-      (item) => !item.type || settings.notifications[item.type]
-    );
-  const unreadCount = notifications.filter((item) => !readIds.includes(item.id)).length;
+  const notifications = isAdmin
+    ? activities.map((item) => ({
+        id: item.id,
+        title: item.message,
+        time: timeAgo(item.created_at),
+        to: "/",
+      }))
+    : allNotifications;
+  const unreadCount = notifications.filter(
+    (item) => !readIds.includes(item.id),
+  ).length;
 
   const updateReadIds = (ids) => {
     setReadIds(ids);
@@ -102,7 +76,10 @@ useEffect(() => {
     if (!readIds.includes(id)) updateReadIds([...readIds, id]);
   };
 
-  const markAllRead = () => updateReadIds([...new Set([...readIds, ...notifications.map((item) => item.id)])]);
+  const markAllRead = () =>
+    updateReadIds([
+      ...new Set([...readIds, ...notifications.map((item) => item.id)]),
+    ]);
 
   return (
     <div className="nav-menu" ref={menuRef}>
@@ -112,11 +89,15 @@ useEffect(() => {
         onClick={() => setIsOpen((open) => !open)}
         aria-expanded={isOpen}
         aria-controls="notification-panel"
-        aria-label={unreadCount ? `Notifications, ${unreadCount} unread` : "Notifications"}
+        aria-label={
+          unreadCount ? `Notifications, ${unreadCount} unread` : "Notifications"
+        }
         title="Notifications"
       >
         <img src={bellIcon} alt="" />
-        {unreadCount > 0 && <span className="notification-badge">{unreadCount}</span>}
+        {unreadCount > 0 && (
+          <span className="notification-badge">{unreadCount}</span>
+        )}
       </button>
 
       {isOpen && (
@@ -135,9 +116,7 @@ useEffect(() => {
 
           {notifications.length === 0 && (
             <p className="notification-empty">
-              {isAdmin
-                ? "No recent activity yet."
-                : "No notifications. You can turn them back on in Settings."}
+              {isAdmin ? "No recent activity yet." : "No notifications."}
             </p>
           )}
 
@@ -158,10 +137,14 @@ useEffect(() => {
                     <span className="notification-dot" aria-hidden="true" />
                     <span>
                       <strong>{item.title}</strong>
-                      {item.text && <span className="notification-text">{item.text}</span>}
+                      {item.text && (
+                        <span className="notification-text">{item.text}</span>
+                      )}
                       <span className="notification-time">{item.time}</span>
                     </span>
-                    {isUnread && <span className="visually-hidden">Unread</span>}
+                    {isUnread && (
+                      <span className="visually-hidden">Unread</span>
+                    )}
                   </Link>
                 </li>
               );

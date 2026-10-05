@@ -10,11 +10,16 @@ function NavSearch() {
 
   // admins search their own catalogue and account list instead of the learner course page;
   // stay on Manage Users while already there, otherwise default to Manage Courses
-  const targetPath = isAdmin ? (pathname === "/admin/users" ? "/admin/users" : "/admin/courses") : "/courses";
+  const targetPath = isAdmin
+    ? pathname === "/admin/users"
+      ? "/admin/users"
+      : "/admin/courses"
+    : "/courses";
   const placeholder = isAdmin ? "Search courses or users" : "Search courses";
 
   // mirror the search on whichever page it targets, and start empty elsewhere
-  const activeSearch = pathname === targetPath ? searchParams.get("q") ?? "" : "";
+  const activeSearch =
+    pathname === targetPath ? (searchParams.get("q") ?? "") : "";
   const [query, setQuery] = useState(activeSearch);
   const [syncedSearch, setSyncedSearch] = useState(activeSearch);
 

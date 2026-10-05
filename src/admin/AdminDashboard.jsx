@@ -1,1 +1,1 @@
-export { default } from '../pages/RoleDashboard';
+export { default } from "../pages/RoleDashboard";

@@ -1,5 +1,11 @@
 import { useEffect, useRef } from "react";
-import { NavLink, Navigate, useLocation, useNavigate, useParams } from "react-router-dom";
+import {
+  NavLink,
+  Navigate,
+  useLocation,
+  useNavigate,
+  useParams,
+} from "react-router-dom";
 import ChangePasswordForm from "../components/ChangePasswordForm";
 import OptionGroup from "../components/OptionGroup";
 import ToggleSwitch from "../components/ToggleSwitch";
@@ -21,10 +27,26 @@ const textSizeOptions = [
 ];
 
 const allSections = [
-  { id: "security", label: "Security", intro: "Change the password you use to log in." },
-  { id: "notifications", label: "Notifications", intro: "Choose what StudyFlow tells you about." },
-  { id: "appearance", label: "Appearance", intro: "Pick a colour theme, or follow your device's setting." },
-  { id: "accessibility", label: "Accessibility", intro: "Make StudyFlow easier to read and use." },
+  {
+    id: "security",
+    label: "Security",
+    intro: "Change the password you use to log in.",
+  },
+  {
+    id: "notifications",
+    label: "Notifications",
+    intro: "Choose what StudyFlow tells you about.",
+  },
+  {
+    id: "appearance",
+    label: "Appearance",
+    intro: "Pick a colour theme, or follow your device's setting.",
+  },
+  {
+    id: "accessibility",
+    label: "Accessibility",
+    intro: "Make StudyFlow easier to read and use.",
+  },
 ];
 
 function Settings() {
@@ -57,10 +79,17 @@ function Settings() {
 
   // /settings and unknown sections open the first one
   if (!section) {
-    return <Navigate to={`/settings/${sections[0].id}`} replace state={location.state} />;
+    return (
+      <Navigate
+        to={`/settings/${sections[0].id}`}
+        replace
+        state={location.state}
+      />
+    );
   }
 
-  const updateNotification = (key) => (checked) => updateSettings({ notifications: { [key]: checked } });
+  const updateNotification = (key) => (checked) =>
+    updateSettings({ notifications: { [key]: checked } });
 
   return (
     <div className="settings-overlay" onMouseDown={close}>
@@ -78,7 +107,12 @@ function Settings() {
             <h1 id="settings-title">Settings</h1>
             <p>Changes are saved automatically.</p>
           </div>
-          <button type="button" className="settings-close" onClick={close} aria-label="Close settings">
+          <button
+            type="button"
+            className="settings-close"
+            onClick={close}
+            aria-label="Close settings"
+          >
             &times;
           </button>
         </header>
@@ -105,7 +139,11 @@ function Settings() {
             {section.id === "security" && <ChangePasswordForm />}
 
             {section.id === "notifications" && (
-              <><p>Notification preferences are stored on this device. Email and deadline delivery are outside this MVP.</p>
+              <>
+                <p>
+                  Notification preferences are stored on this device. Email and
+                  deadline delivery are outside this MVP.
+                </p>
                 <ToggleSwitch
                   id="notify-deadlines"
                   label="Deadlines"
@@ -176,7 +214,9 @@ function Settings() {
                   label="Visible focus outlines"
                   description="Show a clear outline around whatever you've selected with the keyboard."
                   checked={settings.focusOutlines}
-                  onChange={(focusOutlines) => updateSettings({ focusOutlines })}
+                  onChange={(focusOutlines) =>
+                    updateSettings({ focusOutlines })
+                  }
                 />
               </>
             )}

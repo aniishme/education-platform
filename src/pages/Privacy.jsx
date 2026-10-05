@@ -8,15 +8,15 @@ const sections = [
   },
   {
     title: "How we store it",
-    text: "Your login state and profile details are saved in your browser's local storage on your own device. Logging out clears your login state.",
+    text: "Account details, enrolments and lesson progress are stored in PostgreSQL. Passwords are hashed. A secure session cookie keeps you logged in; logout revokes that session. Theme and accessibility settings are stored on your device.",
   },
   {
     title: "How we use it",
-    text: "We use your information to run your account, show your courses and progress, and answer the messages you send us. We do not sell your personal information.",
+    text: "This university demonstration uses account information to show your courses and learning progress. Educators can see learners and progress in their own courses. Administrators manage users and courses.",
   },
   {
     title: "Your choices",
-    text: "You can update your profile at any time and log out whenever you like. Clearing your browser data removes what is stored on your device.",
+    text: "You can update your profile, change your password or log out. Clearing browser data removes local preferences; your account and progress remain in the database. Leaving a course removes its enrolment and progress.",
   },
 ];
 
@@ -26,7 +26,9 @@ function Privacy() {
       <div className="info-heading">
         <p className="eyebrow">Privacy</p>
         <h1 id="privacy-title">Privacy policy</h1>
-        <p>A plain-language summary of how StudyFlow handles your information.</p>
+        <p>
+          A plain-language summary of how StudyFlow handles your information.
+        </p>
       </div>
 
       <div className="info-stack">

@@ -34,7 +34,8 @@ function ChangePasswordForm() {
     } else if (newPassword.length < 8) {
       newErrors.newPassword = "Password must be at least 8 characters.";
     } else if (newPassword === currentPassword) {
-      newErrors.newPassword = "Choose a password different from your current one.";
+      newErrors.newPassword =
+        "Choose a password different from your current one.";
     }
 
     if (!confirmPassword) {

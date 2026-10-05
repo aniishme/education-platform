@@ -1,7 +1,11 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { getAuth, getRole } from "../utils/auth";
-import { PROFILE_UPDATED_EVENT, getInitials, getSavedProfile } from "../utils/profile";
+import {
+  PROFILE_UPDATED_EVENT,
+  getInitials,
+  getSavedProfile,
+} from "../utils/profile";
 import useDismiss from "../utils/useDismiss";
 
 function UserMenu({ onLogout }) {
@@ -21,10 +25,10 @@ function UserMenu({ onLogout }) {
 
   const isAdmin = getRole() === "ADMIN";
   const displayName = isAdmin ? "Admin" : profile.name;
-  const displayEmail = isAdmin ? getAuth()?.email ?? "admin@gmail.com" : profile.email;
+  const displayEmail = isAdmin
+    ? (getAuth()?.email ?? "admin@gmail.com")
+    : profile.email;
   const initials = isAdmin ? "AD" : getInitials(profile.name);
-  // the security tab changes the student demo password, which has nothing to do with
-  // the admin's fixed login credential, so admins skip straight to their other settings
   const settingsPath = "/settings/security";
 
   return (
