@@ -31,8 +31,8 @@ function ChangePasswordForm() {
 
     if (!newPassword) {
       newErrors.newPassword = "Choose a new password.";
-    } else if (newPassword.length < 6) {
-      newErrors.newPassword = "Password must be at least 6 characters.";
+    } else if (newPassword.length < 8) {
+      newErrors.newPassword = "Password must be at least 8 characters.";
     } else if (newPassword === currentPassword) {
       newErrors.newPassword = "Choose a password different from your current one.";
     }
@@ -65,8 +65,8 @@ function ChangePasswordForm() {
       setCurrentPassword("");
       setNewPassword("");
       setConfirmPassword("");
-    } catch {
-      setErrors({ form: "We couldn't change your password in this browser. Please try again." });
+    } catch (error) {
+      setErrors({ form: error.message });
       setSaved(false);
     } finally {
       setIsSaving(false);
@@ -104,7 +104,7 @@ function ChangePasswordForm() {
         id="new-password"
         type="password"
         autoComplete="new-password"
-        placeholder="At least 6 characters"
+        placeholder="At least 8 characters"
         value={newPassword}
         onChange={(event) => {
           setNewPassword(event.target.value);

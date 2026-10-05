@@ -1,13 +1,7 @@
-const API_URL = "http://localhost:5000/api/learner-growth";
+import { api } from '../services/api';
 
 export async function getLearnerGrowth(period) {
-  const response = await fetch(API_URL);
-
-  const users = await response.json();
-
-  if (!response.ok) {
-    throw new Error(users.message || "Unable to fetch learner growth");
-  }
+  const users = await api('/learner-growth');
 
   const students = users.map((user) => ({
     createdAt: new Date(user.created_at),

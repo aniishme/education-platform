@@ -3,7 +3,6 @@ import { NavLink, Navigate, useLocation, useNavigate, useParams } from "react-ro
 import ChangePasswordForm from "../components/ChangePasswordForm";
 import OptionGroup from "../components/OptionGroup";
 import ToggleSwitch from "../components/ToggleSwitch";
-import { getRole } from "../utils/auth";
 import { useSettings } from "../utils/settings";
 import useFocusTrap from "../utils/useFocusTrap";
 import "../Settings.css";
@@ -35,8 +34,7 @@ function Settings() {
   const [settings, updateSettings] = useSettings();
   const cardRef = useRef(null);
 
-  // the security tab changes the student demo password, which isn't how an admin logs in
-  const sections = getRole() === "admin" ? allSections.filter((item) => item.id !== "security") : allSections;
+  const sections = allSections;
   const section = sections.find((item) => item.id === sectionId);
 
   // go back to the page the card was opened over (or home if it was opened directly)
@@ -107,7 +105,7 @@ function Settings() {
             {section.id === "security" && <ChangePasswordForm />}
 
             {section.id === "notifications" && (
-              <>
+              <><p>Notification preferences are stored on this device. Email and deadline delivery are outside this MVP.</p>
                 <ToggleSwitch
                   id="notify-deadlines"
                   label="Deadlines"

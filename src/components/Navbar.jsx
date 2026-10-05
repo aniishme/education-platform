@@ -30,13 +30,12 @@ function Navbar() {
   const [authed, setAuthed] = useState(isLoggedIn);
   const navigate = useNavigate();
 
-  const handleLogout = () => {
-    logout();
-    setAuthed(false);
-    navigate("/login", { replace: true });
+  const handleLogout = async () => {
+    try {await logout();setAuthed(false);navigate("/login", { replace: true });}
+    catch(error){window.alert(error.message);}
   };
 
-  const navigationItems = !authed ? guestNavItems : getRole() === "admin" ? adminNavItems : memberNavItems;
+  const navigationItems = !isLoggedIn() ? guestNavItems : getRole() === "ADMIN" ? adminNavItems : getRole()==='EDUCATOR' ? [{to:'/',label:'Dashboard',end:true},{to:'/educator/courses',label:'My Courses'},{to:'/courses',label:'Catalogue'}] : memberNavItems;
 
   return (
     <header className="site-header">

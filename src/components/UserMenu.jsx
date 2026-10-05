@@ -19,13 +19,13 @@ function UserMenu({ onLogout }) {
     return () => window.removeEventListener(PROFILE_UPDATED_EVENT, refresh);
   }, []);
 
-  const isAdmin = getRole() === "admin";
+  const isAdmin = getRole() === "ADMIN";
   const displayName = isAdmin ? "Admin" : profile.name;
   const displayEmail = isAdmin ? getAuth()?.email ?? "admin@gmail.com" : profile.email;
   const initials = isAdmin ? "AD" : getInitials(profile.name);
   // the security tab changes the student demo password, which has nothing to do with
   // the admin's fixed login credential, so admins skip straight to their other settings
-  const settingsPath = isAdmin ? "/settings/notifications" : "/settings/security";
+  const settingsPath = "/settings/security";
 
   return (
     <div className="nav-menu" ref={menuRef}>

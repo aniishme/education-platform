@@ -1,10 +1,12 @@
 import { Link } from "react-router-dom";
+import { useEffect, useState } from 'react';
+import { getCourses } from '../services/courseService';
 import AdminDashboard from "../admin/AdminDashboard";
 import FeaturedCourseCard from "../components/FeaturedCourseCard";
 import { getRole, isLoggedIn } from "../utils/auth";
 import StudentHome from "./StudentHome";
 
-const featuredCourses = [
+const sampleCourses = [
   {
     id: "react-fundamentals",
     title: "React Fundamentals",
@@ -37,6 +39,8 @@ const categories = [
 ];
 
 function GuestHome() {
+  const [featuredCourses,setFeaturedCourses]=useState([]);
+  useEffect(()=>{let current=true;getCourses().then(courses=>{if(current)setFeaturedCourses(courses.slice(0,3));}).catch(()=>{});return()=>{current=false;};},[]);
   return (
     <>
       <section className="hero-section">
@@ -96,7 +100,7 @@ function GuestHome() {
 // admins land on their dashboard, learners get theirs, visitors get the marketing page
 function Home() {
   if (!isLoggedIn()) return <GuestHome />;
-  return getRole() === "admin" ? <AdminDashboard /> : <StudentHome />;
+  return getRole() === "ADMIN" ? <AdminDashboard /> : <StudentHome />;
 }
 
 export default Home;

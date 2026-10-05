@@ -6,7 +6,7 @@ function NavSearch() {
   const navigate = useNavigate();
   const { pathname } = useLocation();
   const [searchParams] = useSearchParams();
-  const isAdmin = getRole() === "admin";
+  const isAdmin = getRole() === "ADMIN";
 
   // admins search their own catalogue and account list instead of the learner course page;
   // stay on Manage Users while already there, otherwise default to Manage Courses
