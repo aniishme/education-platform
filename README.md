@@ -1,6 +1,6 @@
 # StudyFlow 
 
-A final-year university MVP for discovering, authoring and completing self-paced courses. The existing React/Vite frontend and Express backend are retained, with PostgreSQL running in Docker.
+A Learning Management System for discovering, authoring and completing self-paced courses. The existing React/Vite frontend and Express backend are retained, with PostgreSQL running in Docker.
 
 ## Features and roles
 
