@@ -1,5 +1,11 @@
 import { test, expect } from "@playwright/test";
 import db from "../Backend/db.js";
+// Check our embed integration without depending on YouTube network availability.
+test.beforeEach(async ({ context }) => {
+  await context.route("https://www.youtube-nocookie.com/**", (route) =>
+    route.abort(),
+  );
+});
 test.afterAll(async () => {
   await db.end();
 });
@@ -66,6 +72,14 @@ test("admin dashboard, user roles, course management and refresh", async ({
 }) => {
   await login(page, "admin@example.com");
   await expect(page.getByText("educators", { exact: true })).toBeVisible();
+  await expect(
+    page.getByRole("heading", { name: "Catalogue overview" }),
+  ).toBeVisible();
+  await expect(page.locator(".performance-row")).not.toHaveCount(0);
+  await page.screenshot({
+    path: "test-results/admin-dashboard-desktop.png",
+    fullPage: true,
+  });
   await page.reload();
   await expect(page.getByRole("heading", { name: /Welcome,/ })).toBeVisible();
   await page.getByRole("link", { name: "Manage Users", exact: true }).click();
@@ -96,6 +110,13 @@ test("educator creates modules and lessons, publishes, learner enrols and persis
   const student = await learnerContext.newPage();
   try {
     await login(page, "educator@example.com");
+    await expect(
+      page.getByRole("heading", { name: "Your course overview" }),
+    ).toBeVisible();
+    await page.screenshot({
+      path: "test-results/educator-dashboard-desktop.png",
+      fullPage: true,
+    });
     await page.getByRole("link", { name: "My Courses", exact: true }).click();
     await page
       .getByRole("link", { name: "Create course", exact: true })
@@ -106,6 +127,18 @@ test("educator creates modules and lessons, publishes, learner enrols and persis
       .fill("A browser tested course");
     await page.getByLabel("Category", { exact: true }).fill("Testing");
     await page
+      .getByLabel("Subtitle", { exact: true })
+      .fill("A complete video learning journey");
+    await page
+      .getByLabel("Learning outcomes", { exact: true })
+      .fill("Build a practical project\nTrack learning progress");
+    await page
+      .getByLabel("Prerequisites", { exact: true })
+      .fill("A web browser");
+    await page
+      .getByLabel("Video URL", { exact: true })
+      .fill("https://www.youtube.com/playlist?list=PLC77007E23FF423C6");
+    await page
       .getByRole("button", { name: "Save course", exact: true })
       .click();
     await expect(
@@ -113,6 +146,9 @@ test("educator creates modules and lessons, publishes, learner enrols and persis
     ).toBeVisible();
     courseId = page.url().match(/courses\/(\d+)/)[1];
     await page.getByLabel("New module title").fill("Browser module");
+    await page
+      .getByLabel("New module video or playlist URL")
+      .fill("https://www.youtube.com/playlist?list=PLC77007E23FF423C6");
     await page.getByRole("button", { name: "Add module", exact: true }).click();
     await expect(
       page.getByRole("heading", { name: "Browser module" }),
@@ -125,6 +161,11 @@ test("educator creates modules and lessons, publishes, learner enrols and persis
     await page
       .getByLabel("Lesson text")
       .fill("This text is stored in PostgreSQL.");
+    await page
+      .getByLabel("Video URL", { exact: true })
+      .last()
+      .fill("https://youtu.be/rfscVS0vtbw?t=90");
+    await page.getByLabel("Estimated study time (minutes)").fill("35");
     await page
       .getByRole("button", { name: "Save lesson", exact: true })
       .click();
@@ -146,6 +187,13 @@ test("educator creates modules and lessons, publishes, learner enrols and persis
       .getByLabel("Search by course title", { exact: true })
       .fill(title);
     await student.getByRole("link", { name: /View course/ }).click();
+    await expect(
+      student.getByText("Build a practical project", { exact: false }),
+    ).toBeVisible();
+    await expect(student.locator("iframe")).toHaveAttribute(
+      "src",
+      /videoseries.*list=PLC77007E23FF423C6/,
+    );
     await student.getByRole("button", { name: "Enrol for free" }).click();
     await expect(student.getByText("You are enrolled")).toBeVisible();
     await student
@@ -154,6 +202,10 @@ test("educator creates modules and lessons, publishes, learner enrols and persis
     await expect(
       student.getByText("This text is stored in PostgreSQL."),
     ).toBeVisible();
+    await expect(student.locator("iframe")).toHaveAttribute(
+      "src",
+      /embed\/rfscVS0vtbw\?start=90/,
+    );
     await student
       .getByRole("button", { name: "Mark lesson complete", exact: true })
       .click();
@@ -198,4 +250,83 @@ test("educator creates modules and lessons, publishes, learner enrols and persis
     if (courseId) await page.request.delete("/api/courses/" + courseId);
     await learnerContext.close();
   }
+});
+test("expanded catalogue, recommendations and detailed dashboards render on desktop and mobile", async ({
+  page,
+}) => {
+  await page.goto("/");
+  await expect(
+    page.getByRole("heading", { name: "Real skills. A future you can build." }),
+  ).toBeVisible();
+  await page.screenshot({
+    path: "test-results/home-desktop.png",
+    fullPage: true,
+  });
+  await page.goto("/courses");
+  await expect(page.locator(".market-card")).toHaveCount(12);
+  await page
+    .getByRole("button", { name: "Developer Tools", exact: true })
+    .click();
+  await expect(page.locator(".market-card")).toHaveCount(2);
+  await expect(page).toHaveURL(/category=Developer/);
+  await page.getByRole("button", { name: "All topics", exact: true }).click();
+  await page.getByRole("combobox", { name: "Sort by" }).selectOption("title");
+  await page.screenshot({
+    path: "test-results/catalogue-desktop.png",
+    fullPage: true,
+  });
+  await login(page, "learner@example.com");
+  await expect(
+    page.getByRole("heading", { name: "Recommended courses" }),
+  ).toBeVisible();
+  await expect(
+    page.getByRole("heading", { name: "Learning activity", exact: true }),
+  ).toBeVisible();
+  await expect(
+    page.locator(".activity-list").first().locator("li"),
+  ).not.toHaveCount(0);
+  const enrolled = (
+    await (await page.request.get("/api/enrolments")).json()
+  ).map((c) => c.course_id);
+  const recommended = await (
+    await page.request.get("/api/courses/recommended")
+  ).json();
+  expect(recommended.every((c) => !enrolled.includes(c.id))).toBe(true);
+  await page.screenshot({
+    path: "test-results/learner-dashboard-desktop.png",
+    fullPage: true,
+  });
+  for (const path of ["/learner", "/courses", "/courses/" + enrolled[0]]) {
+    await page.setViewportSize({ width: 390, height: 844 });
+    await page.goto(path);
+    await expect(page.getByRole("heading", { level: 1 })).toBeVisible();
+    expect(
+      await page.evaluate(
+        () => document.documentElement.scrollWidth <= innerWidth,
+      ),
+    ).toBe(true);
+  }
+  await page.screenshot({
+    path: "test-results/course-mobile.png",
+    fullPage: true,
+  });
+  await page.locator(".curriculum-lesson button").first().click();
+  await expect(
+    page.getByRole("heading", { name: "Key concepts", exact: true }),
+  ).toBeVisible();
+  await expect(
+    page.getByRole("heading", { name: "Worked example", exact: true }),
+  ).toBeVisible();
+  await expect(
+    page.getByRole("heading", { name: "Practice lab", exact: true }),
+  ).toBeVisible();
+  expect(
+    await page.evaluate(
+      () => document.documentElement.scrollWidth <= innerWidth,
+    ),
+  ).toBe(true);
+  await page.screenshot({
+    path: "test-results/lesson-mobile.png",
+    fullPage: true,
+  });
 });

@@ -9,6 +9,10 @@ A final-year university MVP for discovering, authoring and completing self-paced
 - **LEARNER:** register/login; search/filter published courses; enrol once; view enrolments; resume the last accessed lesson; mark lessons complete/incomplete; persistent course and overall progress.
 - All roles can edit their profile and change their password. Theme and accessibility preferences stay on the device.
 - Loading, empty and error states; role navigation; responsive layouts; API validation and permission checks.
+- An expanded marketplace with category covers, course subtitles, learning outcomes, prerequisites, lesson/module counts, real enrolment counts, category browsing and sorting.
+- Embedded YouTube videos and playlists at course, module and lesson level. Educators paste links; no video storage, streaming service or API key is required.
+- Recommendations match enrolled categories, then rank by actual enrolments. Already-enrolled courses and unpublished courses are excluded.
+- Dashboards include seven-day completion activity, recent completions/enrolments, topic breakdowns, resume cards and educator/admin course performance. New accounts have honest empty states; demo accounts have stored demonstration activity.
 
 ## Technology stack
 
@@ -42,6 +46,7 @@ Backend/security.js      Sessions, role guards and validation
 Backend/courseAccess.js  Ownership and content access
 Backend/routes/          Auth, courses, learning and admin APIs
 Backend/database/        PostgreSQL schema, migration and demo seed
+shared/youtube.mjs       Shared YouTube URL validation and safe embed construction
 Backend/test/            Real database HTTP integration tests
 tests/                   Playwright browser journeys
 compose.yaml             PostgreSQL service and persistent volume
@@ -104,7 +109,9 @@ All accounts use **`DemoPass123!`** (development only):
 | EDUCATOR | `educator@example.com` |
 | LEARNER | `learner@example.com` |
 
-The seed adds Web Development Fundamentals (HTML/CSS), Database Management and Python Programming, with modules and text lessons. The learner has one completed lesson in each enrolled course. Public registration permits LEARNER or EDUCATOR; administrators are seeded or managed by another admin.
+The catalogue contains **12 courses, 35 modules and 73 lessons**, with original explanations, worked examples, practice labs, capstones, outcomes and prerequisites. Subjects include HTML/CSS, JavaScript, React, Node/Express, Python, SQL, Git, Linux, data analysis, algorithms, computer science and UI/UX. Companion videos are credited to their original creators; see [resource credits](COURSE_RESOURCES.md).
+
+Additional demo educators: `priya@example.com`, `jordan@example.com`. Additional demo learners: `maya@example.com`, `oliver@example.com`, `aisha@example.com`, `lucas@example.com`, `emma@example.com`. All use the same development password above. Sam has six enrolments, including a completed Git course; other learners provide varied course progress for educator/admin demonstrations. These are real database fixtures, not hardcoded UI percentages. Existing progress is preserved when upgrading; individual totals can differ after normal use. Public registration permits LEARNER or EDUCATOR; administrators are seeded or managed by another admin.
 
 ## Major user flows
 
@@ -112,7 +119,22 @@ The seed adds Web Development Fundamentals (HTML/CSS), Database Management and P
 2. **Educator:** register as Educator or demo login → My Courses → Create course → save draft → add module → add lessons → edit → select PUBLISHED → Save course → Learners & progress.
 3. **Learner:** register/login → Courses → search/filter → View course → Enrol for free → select lesson → Mark lesson complete → My Learning/Progress → logout/login → resume persisted progress.
 
-Course/module/lesson edits save separately. Order starts at zero; ties sort by ID. Publishing requires at least one lesson. Thumbnails/videos use HTTP(S) URLs; videos open externally without streaming infrastructure.
+Course/module/lesson edits save separately. Order starts at zero; ties sort by ID. Publishing requires at least one lesson. Thumbnails use HTTP(S) URLs, with category covers as a fallback. Lesson study time is an educator estimate for reading/practice, not measured video runtime or watched minutes.
+
+### Add a YouTube video or playlist
+
+1. Create/edit a course and paste a video or playlist into **Video URL** for its preview/default resource.
+2. Optionally add a module-specific resource using **New module video or playlist URL**, or the existing module's **Video URL**.
+3. Add a lesson with notes, description, order and estimated study time. Its **Video URL** overrides the module/course resource; leaving it blank uses the module resource, then the course resource.
+4. Open **Preview video resource** in the editor, save the relevant form, and publish when your curriculum is ready.
+
+Supported examples: `https://www.youtube.com/watch?v=rfscVS0vtbw`, `https://youtu.be/rfscVS0vtbw?t=90`, and `https://www.youtube.com/playlist?list=PLAYLIST_ID`. Shorts/live URLs and video links with a playlist are also accepted. Playlists use YouTube's player menu to switch videos. **Playlist URLs do not automatically create LMS lessons**; add lessons explicitly so each has its own notes and completion record. No videos are downloaded or uploaded to this application. Other valid HTTP(S) video URLs remain external links.
+
+The player uses the privacy-enhanced `youtube-nocookie.com` embed host. Availability, ads, chapter navigation and embedding permission are controlled by YouTube and the original creator; an **Open on YouTube** link is always provided. Completing a lesson is a deliberate learner action, not an automatic result of playing a video. Seed courses share a companion full-course video across relevant lessons; use its chapter list to find a topic.
+
+### Upgrade an existing PostgreSQL installation
+
+Run `npm.cmd run migrate --prefix Backend`, then `npm.cmd run seed --prefix Backend`. Additive columns store subtitle, outcomes, prerequisites, course/module video URLs, demo catalogue keys and lesson study time. Original generic seed content is enriched while retaining its lesson IDs and saved progress. Subsequent seeds leave existing marked course content, module/lesson edits, passwords and completion records alone. New fixture enrolments create demonstration activity once. Never delete the Docker volume to apply this upgrade.
 
 ## API outline
 
@@ -129,6 +151,8 @@ Course/module/lesson edits save separately. Order starts at zero; ties sort by I
 | `GET /api/lessons/:id`, `/api/courses/:id/progress` | Enrolled learner or owner/admin |
 | `PUT /api/lessons/:id/progress` | Enrolled learner; `{completed: true/false}` |
 | `GET /api/dashboard` | Role-specific statistics |
+| `GET /api/dashboard/details` | Role-scoped activity, categories and recent registrations/enrolments |
+| `GET /api/courses/recommended` | Published recommendations, excluding the current user's enrolments |
 | `GET /api/users`; `PUT /api/users/:id`, `/users/:id/status` | Admin |
 | `GET /api/activity`, `/learner-growth` | Admin |
 
@@ -150,4 +174,4 @@ For a production-build preview, run `npm.cmd run preview` alongside the API and 
 
 ## Limitations
 
-No payments, streaming, certificates, email delivery, password reset or uploads. Thumbnail/video resources use external URLs. Demo lessons are introductory and can be expanded for assessment. Contact is a demonstration form and does not deliver messages. Notification preferences are local settings; deadline/email delivery is not implemented. The schema setup is repeatable for fresh PostgreSQL databases, not an import of historical MySQL data. Categories are simple text fields.
+No payments, streaming infrastructure, certificates, email delivery, password reset or local file uploads. YouTube playback depends on external availability. Playlist-to-lesson import and automatic video watch tracking are outside scope. Guided demo curricula are original introductory material, not accredited instruction; companion videos may use older tool versions. Contact is a demonstration form and does not deliver messages. Notification preferences are local settings; deadline/email delivery is not implemented. The schema setup does not import historical MySQL data. Categories are simple text fields.

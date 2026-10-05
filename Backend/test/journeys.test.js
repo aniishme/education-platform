@@ -119,6 +119,7 @@ test("educator CRUD, ownership, publishing, enrolment and persistent progress", 
   const instructor = await register(educator, "EDUCATOR", "educator");
   await register(other, "EDUCATOR", "other");
   const student = await register(learner, "LEARNER", "learner");
+  await guest("/dashboard/details", "GET", undefined, 401);
   await learner("/users", "GET", undefined, 403);
   await educator("/users", "GET", undefined, 403);
   await learner("/courses", "POST", { title: "Forbidden" }, 403);
@@ -132,11 +133,30 @@ test("educator CRUD, ownership, publishing, enrolment and persistent progress", 
   const { course } = await educator(
     "/courses",
     "POST",
-    { title: "Test course", description: "Course content", category: "Test" },
+    {
+      title: "Test course",
+      description: "Course content",
+      category: "Test",
+      subtitle: "Learn the complete flow",
+      outcomes: "Build a project\nExplain your decisions",
+      requirements: "A browser",
+      video_url: "https://youtu.be/rfscVS0vtbw?t=60",
+    },
     201,
   );
   courses.push(course.id);
   assert.equal(course.educator_id, instructor.id);
+  assert.equal(
+    course.video_url,
+    "https://www.youtube.com/watch?v=rfscVS0vtbw&t=60",
+  );
+  assert.equal(course.outcomes, "Build a project\nExplain your decisions");
+  await educator(
+    "/courses/" + course.id,
+    "PUT",
+    { video_url: "https://youtube.com/watch?v=invalid" },
+    400,
+  );
   await guest("/courses/" + course.id, "GET", undefined, 404);
   await learner("/enrolments", "POST", { course_id: course.id }, 404);
   await other("/courses/" + course.id, "PUT", { title: "Stolen" }, 403);
@@ -145,8 +165,15 @@ test("educator CRUD, ownership, publishing, enrolment and persistent progress", 
   const section = await educator(
     "/courses/" + course.id + "/sections",
     "POST",
-    { title: "Module one" },
+    {
+      title: "Module one",
+      video_url: "https://www.youtube.com/playlist?list=PLC77007E23FF423C6",
+    },
     201,
+  );
+  assert.equal(
+    section.video_url,
+    "https://www.youtube.com/playlist?list=PLC77007E23FF423C6",
   );
   await other(
     "/courses/sections/" + section.id,
@@ -157,8 +184,20 @@ test("educator CRUD, ownership, publishing, enrolment and persistent progress", 
   const first = await educator(
     "/courses/sections/" + section.id + "/lessons",
     "POST",
-    { title: "First", content: "Lesson text" },
+    {
+      title: "First",
+      content: "Lesson text",
+      duration_minutes: 35,
+      video_url: "https://www.youtube.com/watch?v=rfscVS0vtbw",
+    },
     201,
+  );
+  assert.equal(first.duration_minutes, 35);
+  await educator(
+    "/courses/sections/" + section.id + "/lessons",
+    "POST",
+    { title: "Bad duration", duration_minutes: -1 },
+    400,
   );
   const second = await educator(
     "/courses/sections/" + section.id + "/lessons",
@@ -198,6 +237,54 @@ test("educator CRUD, ownership, publishing, enrolment and persistent progress", 
   assert.equal(enrolled[0].progress, 50);
   assert.equal(enrolled[0].user_id, student.id);
   assert.equal(enrolled[0].last_lesson_id, first.id);
+  const insight = await learner("/dashboard/details");
+  assert.equal(insight.recent.length, 1);
+  assert.equal(insight.recent[0].title, "Updated first");
+  assert.equal(
+    insight.weekly.reduce((sum, day) => sum + day.lessons, 0),
+    1,
+  );
+  assert.match(insight.weekly[0].day, /^\d{4}-\d{2}-\d{2}$/);
+  assert.equal((await other("/dashboard/details")).recent.length, 0);
+  const recommendations = await learner("/courses/recommended");
+  assert.ok(
+    recommendations.every(
+      (c) => c.id !== course.id && c.status === "PUBLISHED",
+    ),
+  );
+  assert.ok(
+    recommendations.every((c) => typeof c.recommendation_reason === "string"),
+  );
+  const suggested = (
+    await other(
+      "/courses",
+      "POST",
+      {
+        title: "Suggested next step",
+        description: "Another course in the enrolled category",
+        category: "Test",
+      },
+      201,
+    )
+  ).course;
+  courses.push(suggested.id);
+  const suggestedModule = await other(
+    "/courses/" + suggested.id + "/sections",
+    "POST",
+    { title: "Next step" },
+    201,
+  );
+  await other(
+    "/courses/sections/" + suggestedModule.id + "/lessons",
+    "POST",
+    { title: "Try it" },
+    201,
+  );
+  await other("/courses/" + suggested.id, "PUT", { status: "PUBLISHED" });
+  const ranked = await learner("/courses/recommended");
+  assert.equal(ranked[0].id, suggested.id);
+  assert.equal(ranked[0].category_match, true);
+  assert.equal(ranked[0].recommendation_reason, "Because you're learning Test");
   await learner("/auth/logout", "POST");
   await learner("/auth/login", "POST", {
     email: student.email,
