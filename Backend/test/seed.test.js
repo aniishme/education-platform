@@ -36,8 +36,11 @@ test("demo seed is repeatable without duplicates, overwritten content or lost pr
   assert.deepEqual(after, before);
   // Existing educators/learners may edit fixtures or leave courses. Their data
   // must survive reseeding, so verify the manifest separately from live totals.
-  const catalogue=require('../database/catalogue');
-  assert.equal(catalogue.length,12);
-  assert.equal(catalogue.flatMap(c=>c.modules.flatMap(m=>m.lessons)).length,73);
-  assert.equal(after.courses.length,catalogue.length);
+  const catalogue = require("../database/catalogue");
+  assert.equal(catalogue.length, 12);
+  assert.equal(
+    catalogue.flatMap((c) => c.modules.flatMap((m) => m.lessons)).length,
+    73,
+  );
+  assert.equal(after.courses.length, catalogue.length);
 });

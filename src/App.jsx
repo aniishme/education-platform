@@ -32,6 +32,7 @@ import ProtectedRoute from "./components/ProtectedRoute";
 import "./App.css";
 import "./Accessibility.css";
 import "./Marketplace.css";
+import "./Workspace.css";
 
 // what sits behind the Settings card when there is no page to go back to (e.g. a pasted /settings link)
 const homeLocation = {
