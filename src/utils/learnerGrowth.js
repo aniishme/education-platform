@@ -1,67 +1,124 @@
-// Sample data until the app tracks real sign-ups: how many learners joined
-// per day, month, or year. Values are oldest first, ending at the current period.
+const API_URL = "http://localhost:5000/api/learner-growth";
 
-const dailyCounts = [2, 3, 1, 4, 2, 5, 3, 2, 4, 3, 5, 4, 3, 6];
-const monthlyCounts = [12, 16, 14, 21, 18, 26];
-const yearlyCounts = [24, 38, 51, 67, 84];
+export async function getLearnerGrowth(period) {
+  const response = await fetch(API_URL);
 
-const startOfToday = () => {
+  const users = await response.json();
+
+  if (!response.ok) {
+    throw new Error(users.message || "Unable to fetch learner growth");
+  }
+
+  const students = users.map((user) => ({
+    createdAt: new Date(user.created_at),
+  }));
+
+  if (period === "months") {
+    return buildMonths(students);
+  }
+
+  if (period === "years") {
+    return buildYears(students);
+  }
+
+  return buildDays(students);
+}
+
+function startOfToday() {
   const today = new Date();
   today.setHours(0, 0, 0, 0);
   return today;
-};
+}
 
-function buildDays() {
+function buildDays(students) {
   const today = startOfToday();
+  const points = [];
 
-  return dailyCounts.map((value, index) => {
-    const daysAgo = dailyCounts.length - 1 - index;
+  for (let daysAgo = 13; daysAgo >= 0; daysAgo--) {
     const date = new Date(today);
     date.setDate(date.getDate() - daysAgo);
 
-    return {
+    const value = students.filter((student) => {
+      const created = new Date(student.createdAt);
+
+      return (
+        created.getFullYear() === date.getFullYear() &&
+        created.getMonth() === date.getMonth() &&
+        created.getDate() === date.getDate()
+      );
+    }).length;
+
+    points.push({
       value,
       isCurrent: daysAgo === 0,
       shortLabel: String(date.getDate()),
-      longLabel: date.toLocaleDateString(undefined, { weekday: "long", day: "numeric", month: "short" }),
-    };
-  });
+      longLabel: date.toLocaleDateString(undefined, {
+        weekday: "long",
+        day: "numeric",
+        month: "short",
+      }),
+    });
+  }
+
+  return points;
 }
 
-function buildMonths() {
+function buildMonths(students) {
   const today = startOfToday();
+  const points = [];
 
-  return monthlyCounts.map((value, index) => {
-    const monthsAgo = monthlyCounts.length - 1 - index;
-    const date = new Date(today.getFullYear(), today.getMonth() - monthsAgo, 1);
+  for (let monthsAgo = 5; monthsAgo >= 0; monthsAgo--) {
+    const date = new Date(
+      today.getFullYear(),
+      today.getMonth() - monthsAgo,
+      1
+    );
 
-    return {
+    const value = students.filter((student) => {
+      const created = new Date(student.createdAt);
+
+      return (
+        created.getFullYear() === date.getFullYear() &&
+        created.getMonth() === date.getMonth()
+      );
+    }).length;
+
+    points.push({
       value,
       isCurrent: monthsAgo === 0,
-      shortLabel: date.toLocaleDateString(undefined, { month: "short" }),
-      longLabel: date.toLocaleDateString(undefined, { month: "long", year: "numeric" }),
-    };
-  });
+      shortLabel: date.toLocaleDateString(undefined, {
+        month: "short",
+      }),
+      longLabel: date.toLocaleDateString(undefined, {
+        month: "long",
+        year: "numeric",
+      }),
+    });
+  }
+
+  return points;
 }
 
-function buildYears() {
+function buildYears(students) {
   const today = startOfToday();
+  const points = [];
 
-  return yearlyCounts.map((value, index) => {
-    const yearsAgo = yearlyCounts.length - 1 - index;
+  for (let yearsAgo = 4; yearsAgo >= 0; yearsAgo--) {
     const year = today.getFullYear() - yearsAgo;
 
-    return {
+    const value = students.filter((student) => {
+      const created = new Date(student.createdAt);
+
+      return created.getFullYear() === year;
+    }).length;
+
+    points.push({
       value,
       isCurrent: yearsAgo === 0,
       shortLabel: String(year),
       longLabel: String(year),
-    };
-  });
-}
+    });
+  }
 
-const builders = { days: buildDays, months: buildMonths, years: buildYears };
-
-export function getLearnerGrowth(period) {
-  return (builders[period] ?? builders.days)();
+  return points;
 }

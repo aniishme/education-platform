@@ -1,9 +1,14 @@
 const express = require("express");
+<<<<<<< HEAD
 
+=======
+const rateLimit = require("express-rate-limit");
+>>>>>>> origin/main
 const router = express.Router();
 
 const {
     getLessonsByCourse,
+<<<<<<< HEAD
     getLessonById,
     completeLesson,
     getLessonProgress
@@ -20,5 +25,20 @@ router.post("/complete", completeLesson);
 
 // Get one lesson
 router.get("/:id", getLessonById);
+=======
+    getLessonById
+} = require("../controllers/lessonsController");
+
+const lessonsReadLimiter = rateLimit({
+    windowMs: 15 * 60 * 1000,
+    limit: 100
+});
+
+// Get all lessons for a course
+router.get("/course/:courseId", lessonsReadLimiter, getLessonsByCourse);
+
+// Get one lesson
+router.get("/:id", lessonsReadLimiter, getLessonById);
+>>>>>>> origin/main
 
 module.exports = router;

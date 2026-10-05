@@ -1,17 +1,74 @@
 import LearnerGrowthChart from "./LearnerGrowthChart";
+import { useEffect, useState } from "react";
 import { getRecentActivity, timeAgo } from "../services/activityService";
-import { getAllCourses } from "../services/courseService";
+import { getCourses } from "../services/courseService";
 import { getUsers } from "../services/userService";
+import { getEnrolments } from "../services/enrolmentService";
 import "../Dashboard.css";
 import "../Admin.css";
 
 function AdminDashboard() {
-  const courses = getAllCourses();
-  const users = getUsers();
-  const learners = users.filter((user) => user.role === "Student");
-  const totalEnrollments = users.reduce((sum, user) => sum + (user.enrolledCourseIds?.length ?? 0), 0);
-  const activity = getRecentActivity();
+  const [courses, setCourses] = useState([]);
+  const [users, setUsers] = useState([]);
+  const [enrolments, setEnrolments] = useState([]);
+  const [activity, setActivity] = useState([]);
 
+  useEffect(() => {
+  async function loadCourses() {
+    try {
+      const courseData = await getCourses();
+      setCourses(courseData);
+    } catch (error) {
+      console.error("Unable to load courses:", error);
+    }
+  }
+
+  loadCourses();
+}, []);
+
+useEffect(() => {
+  async function loadUsers() {
+    try {
+      const userData = await getUsers();
+      setUsers(userData);
+    } catch (error) {
+      console.error("Unable to load users:", error);
+    }
+  }
+
+  loadUsers();
+}, []);
+
+ useEffect(() => {
+  async function loadEnrolments() {
+    try {
+      const enrolmentData = await getEnrolments();
+      setEnrolments(enrolmentData);
+    } catch (error) {
+      console.error("Unable to load enrolments:", error);
+    }
+  }
+
+  loadEnrolments();
+}, []);
+
+useEffect(() => {
+  async function loadActivity() {
+    try {
+      const activityData = await getRecentActivity();
+      setActivity(activityData);
+    } catch (error) {
+      console.error("Unable to load activity:", error);
+    }
+  }
+
+  loadActivity();
+}, []);
+const learners = users.filter(
+  (user) => user.role?.toLowerCase() === "student"
+);
+
+  const totalEnrollments = enrolments.length;
   const stats = [
     { label: "Total Courses", value: courses.length },
     { label: "Total Enrollments", value: totalEnrollments },
@@ -48,7 +105,7 @@ function AdminDashboard() {
             {activity.map((item) => (
               <li key={item.id}>
                 <span>{item.message}</span>
-                <time dateTime={item.timestamp}>{timeAgo(item.timestamp)}</time>
+                <time dateTime={item.timestamp}>{timeAgo(item.created_at)}</time>
               </li>
             ))}
           </ul>
