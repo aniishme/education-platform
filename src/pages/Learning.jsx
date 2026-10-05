@@ -4,6 +4,8 @@ import { api } from "../services/api";
 import useResource from "../utils/useResource";
 import ResourceState from "../components/ResourceState";
 import "../MyLearning.css";
+import CourseCover from "../components/CourseCover";
+import Recommendations from "../components/Recommendations";
 export default function Learning({ summary = false }) {
   const resource = useResource("/enrolments");
   const [error, setError] = useState("");
@@ -48,11 +50,12 @@ export default function Learning({ summary = false }) {
         {courses.map((c) => (
           <article className="learning-course-card" key={c.id}>
             <div className="learning-course-main">
+              <CourseCover compact course={c} />
               <span className="course-category">{c.category}</span>
               <h2>{c.title}</h2>
               <p>
                 {c.status === "PUBLISHED"
-                  ? c.description
+                  ? c.subtitle || c.description
                   : "This course is temporarily unpublished."}
               </p>
             </div>
@@ -89,6 +92,7 @@ export default function Learning({ summary = false }) {
           </article>
         ))}
       </div>
+      {!summary && <Recommendations />}
     </section>
   );
 }

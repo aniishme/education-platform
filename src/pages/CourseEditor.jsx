@@ -4,6 +4,8 @@ import { api } from "../services/api";
 import useResource from "../utils/useResource";
 import ResourceState from "../components/ResourceState";
 import { getAuth } from "../utils/auth";
+import YouTubePlayer from "../components/YouTubePlayer";
+import { parseYouTubeUrl } from "../../shared/youtube.mjs";
 const emptyCourse = {
   title: "",
   description: "",
@@ -12,6 +14,10 @@ const emptyCourse = {
   duration: "",
   image: "",
   status: "DRAFT",
+  subtitle: "",
+  outcomes: "",
+  requirements: "",
+  video_url: "",
 };
 export default function CourseEditor() {
   const { id } = useParams();
@@ -70,6 +76,7 @@ function Editor({ initial, reload }) {
         body: {
           title: new FormData(element).get("title"),
           position: initial.sections.length,
+          video_url: new FormData(element).get("video_url"),
         },
       });
       element.reset();
@@ -100,13 +107,18 @@ function Editor({ initial, reload }) {
           setValues={setForm}
           fields={[
             "title",
+            "subtitle",
             "description",
+            "outcomes",
+            "requirements",
             "category",
             "level",
             "duration",
             "image",
+            "video_url",
           ]}
         />
+        <VideoHelp url={form.video_url} />
         {initial.id && (
           <label className="lms-field">
             Status
@@ -135,6 +147,14 @@ function Editor({ initial, reload }) {
               New module title
               <input name="title" required maxLength={150} />
             </label>
+            <label className="lms-field">
+              New module video or playlist URL
+              <input
+                name="video_url"
+                type="url"
+                placeholder="https://www.youtube.com/playlist?list=…"
+              />
+            </label>
             <button className="primary-button" disabled={busy}>
               Add module
             </button>
@@ -158,32 +178,47 @@ function Fields({ values, setValues, fields }) {
         image: "Thumbnail URL",
         position: "Order",
         content: "Lesson text",
+        outcomes: "Learning outcomes",
+        requirements: "Prerequisites",
+        duration_minutes: "Estimated study time (minutes)",
       }[name] || name[0].toUpperCase() + name.slice(1)}
-      {["content", "description"].includes(name) ? (
+      {["content", "description", "outcomes", "requirements"].includes(name) ? (
         <textarea
-          value={values[name]}
+          value={values[name] ?? ""}
+          placeholder={
+            ["outcomes", "requirements"].includes(name)
+              ? "One item per line"
+              : undefined
+          }
           required={name === "description" && fields.includes("category")}
           onChange={(e) => setValues({ ...values, [name]: e.target.value })}
         />
       ) : (
         <input
           type={
-            name === "position"
+            ["position", "duration_minutes"].includes(name)
               ? "number"
               : ["image", "video_url"].includes(name)
                 ? "url"
                 : "text"
           }
           min={0}
-          max={name === "position" ? 100000 : undefined}
+          max={
+            name === "position"
+              ? 100000
+              : name === "duration_minutes"
+                ? 1440
+                : undefined
+          }
           maxLength={name === "title" ? 150 : undefined}
           required={["title", "category"].includes(name)}
-          value={values[name]}
+          value={values[name] ?? ""}
           onChange={(e) =>
             setValues({
               ...values,
-              [name]:
-                name === "position" ? Number(e.target.value) : e.target.value,
+              [name]: ["position", "duration_minutes"].includes(name)
+                ? Number(e.target.value)
+                : e.target.value,
             })
           }
         />
@@ -195,6 +230,7 @@ function Module({ section, reload }) {
   const [form, setForm] = useState({
     title: section.title,
     position: section.position,
+    video_url: section.video_url || "",
   });
   const [error, setError] = useState("");
   const [busy, setBusy] = useState(false);
@@ -229,8 +265,9 @@ function Module({ section, reload }) {
         <Fields
           values={form}
           setValues={setForm}
-          fields={["title", "position"]}
+          fields={["title", "position", "video_url"]}
         />
+        <VideoHelp url={form.video_url} />
         <div className="lms-actions">
           <button className="secondary-button" disabled={busy}>
             Save module
@@ -290,6 +327,7 @@ function Module({ section, reload }) {
               content: "",
               video_url: "",
               position: section.lessons.length,
+              duration_minutes: 25,
             }}
             saved={() => {
               setEditing(null);
@@ -345,8 +383,16 @@ function LessonForm({ initial, sectionId, saved, cancel }) {
       <Fields
         values={form}
         setValues={setForm}
-        fields={["title", "description", "content", "video_url", "position"]}
+        fields={[
+          "title",
+          "description",
+          "content",
+          "video_url",
+          "position",
+          "duration_minutes",
+        ]}
       />
+      <VideoHelp url={form.video_url} />
       {error && (
         <p role="alert" className="error-message">
           {error}
@@ -361,5 +407,24 @@ function LessonForm({ initial, sectionId, saved, cancel }) {
         </button>
       </div>
     </form>
+  );
+}
+function VideoHelp({ url }) {
+  return (
+    <div className="video-help">
+      <p className="helper-text">
+        Paste an existing YouTube video or playlist URL. Short links, Shorts,
+        and links with a start time are supported. Playlists stay in the player;
+        add individual lessons to track progress. No video upload or YouTube API
+        key is needed. A lesson with no video uses its module resource, then the
+        course resource.
+      </p>
+      {parseYouTubeUrl(url) && (
+        <details>
+          <summary>Preview video resource</summary>
+          <YouTubePlayer url={url} title="Educator video preview" />
+        </details>
+      )}
+    </div>
   );
 }

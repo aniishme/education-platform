@@ -6,7 +6,12 @@ import ResourceState from "../components/ResourceState";
 export default function ManageUsers() {
   const resource = useResource("/users");
   const [params, setParams] = useSearchParams();
-  const [role, setRole] = useState("");
+  const role = params.get("role") || "";
+  const setRole = (value) => {
+    const next = new URLSearchParams(params);
+    value ? next.set("role", value) : next.delete("role");
+    setParams(next);
+  };
   const [editing, setEditing] = useState(null);
   const [error, setError] = useState("");
   const [busy, setBusy] = useState(false);
@@ -56,7 +61,13 @@ export default function ManageUsers() {
             type="search"
             value={params.get("q") || ""}
             onChange={(e) =>
-              setParams(e.target.value ? { q: e.target.value } : {})
+              (() => {
+                const next = new URLSearchParams(params);
+                e.target.value
+                  ? next.set("q", e.target.value)
+                  : next.delete("q");
+                setParams(next);
+              })()
             }
           />
         </label>

@@ -1,98 +1,152 @@
 import { Link } from "react-router-dom";
-import { useEffect, useState } from "react";
-import { getCourses } from "../services/courseService";
-import AdminDashboard from "../admin/AdminDashboard";
-import FeaturedCourseCard from "../components/FeaturedCourseCard";
-import { getRole, isLoggedIn } from "../utils/auth";
-import StudentHome from "./StudentHome";
-
-const categories = [
-  "Web Development",
-  "Cybersecurity",
-  "Cloud Computing",
-  "Programming",
-  "Networking",
-  "Database",
-  "UI/UX",
-  "Project Management",
-];
-
+import { isLoggedIn } from "../utils/auth";
+import RoleDashboard from "./RoleDashboard";
+import useResource from "../utils/useResource";
+import ResourceState from "../components/ResourceState";
+import CourseCard from "../components/CourseCard";
 function GuestHome() {
-  const [featuredCourses, setFeaturedCourses] = useState([]);
-  useEffect(() => {
-    let current = true;
-    getCourses()
-      .then((courses) => {
-        if (current) setFeaturedCourses(courses.slice(0, 3));
-      })
-      .catch(() => {});
-    return () => {
-      current = false;
-    };
-  }, []);
+  const resource = useResource("/courses");
+  const courses = resource.data || [],
+    categories = [...new Set(courses.map((c) => c.category))];
+  const featured = [...courses]
+    .sort((a, b) => b.enrolment_count - a.enrolment_count)
+    .slice(0, 4);
   return (
     <>
-      <section className="hero-section">
-        <div className="hero-content">
-          <p className="eyebrow">Learn with StudyFlow</p>
-          <h1>Learn New Skills at Your Own Pace</h1>
-          <p className="hero-description">
-            Explore practical courses, build your knowledge, and keep your
-            learning goals moving forward.
+      <section className="market-hero">
+        <div>
+          <p className="eyebrow">Invest in your next chapter</p>
+          <h1>
+            Real skills.
+            <br />A future you can build.
+          </h1>
+          <p>
+            Go from curious to capable with practical courses, expert video
+            resources, and projects that put your knowledge to work.
           </p>
-          <Link className="primary-button" to="/courses">
-            Browse Courses
-          </Link>
-        </div>
-        <div className="hero-note" role="group" aria-label="StudyFlow benefits">
-          <span className="hero-note-number">01</span>
-          <h2>Simple, focused learning</h2>
-          <p>Choose a course and learn through short, manageable lessons.</p>
-        </div>
-      </section>
-
-      <section className="home-section" aria-labelledby="featured-heading">
-        <div className="section-heading">
-          <div>
-            <p className="eyebrow">Start exploring</p>
-            <h2 id="featured-heading">Featured Courses</h2>
+          <div className="lms-actions">
+            <Link className="primary-button" to="/courses">
+              Browse Courses →
+            </Link>
+            <Link className="secondary-button" to="/signup">
+              Start learning for free
+            </Link>
           </div>
-          <Link className="text-link" to="/courses">
-            View all courses <span aria-hidden="true">→</span>
-          </Link>
+          <p className="helper-text">
+            Free enrolment · Learn at your pace · Progress that stays with you
+          </p>
         </div>
-
-        <div className="featured-grid">
-          {featuredCourses.map((course) => (
-            <FeaturedCourseCard key={course.id} course={course} />
-          ))}
-        </div>
-      </section>
-
-      <section
-        className="home-section category-section"
-        aria-labelledby="categories-heading"
-      >
-        <div className="section-heading">
-          <div>
-            <p className="eyebrow">Find your direction</p>
-            <h2 id="categories-heading">Course Categories</h2>
+        <div className="hero-learning-board">
+          <span className="hero-board-label">
+            A little learning. A lot of possibility.
+          </span>
+          <div className="hero-code">
+            <span>// your next chapter</span>
+            <p>
+              learn.skills(
+              <br />
+              &nbsp; 'build',
+              <br />
+              &nbsp; 'design',
+              <br />
+              &nbsp; 'solve'
+              <br />
+              );
+            </p>
+          </div>
+          <div className="hero-board-bottom">
+            <strong>Choose your own path</strong>
+            <span>Video + notes + practice</span>
           </div>
         </div>
-        <div className="category-list">
-          {categories.map((category) => (
-            <span key={category}>{category}</span>
-          ))}
+      </section>
+      <ResourceState resource={resource} />
+      {resource.data && (
+        <>
+          <div className="catalogue-highlights">
+            <div>
+              <strong>{courses.length}</strong>
+              <span>courses to explore</span>
+            </div>
+            <div>
+              <strong>
+                {courses.reduce((n, c) => n + c.total_lessons, 0)}
+              </strong>
+              <span>guided lessons</span>
+            </div>
+            <div>
+              <strong>{categories.length}</strong>
+              <span>skill categories</span>
+            </div>
+            <div>
+              <strong>100% free</strong>
+              <span>course enrolment</span>
+            </div>
+          </div>
+          <section className="home-section">
+            <div className="section-heading">
+              <div>
+                <p className="eyebrow">Where learners are starting</p>
+                <h2>Popular courses</h2>
+                <p>Build a foundation, then take your skills further.</p>
+              </div>
+              <Link className="text-link" to="/courses">
+                View all courses →
+              </Link>
+            </div>
+            <div className="market-grid home-market-grid">
+              {featured.map((c) => (
+                <CourseCard course={c} key={c.id} />
+              ))}
+            </div>
+          </section>
+          <section className="home-section">
+            <div className="section-heading">
+              <div>
+                <p className="eyebrow">Find your direction</p>
+                <h2>Explore by topic</h2>
+              </div>
+            </div>
+            <div className="category-explore-grid">
+              {categories.map((c) => (
+                <Link key={c} to={"/courses?category=" + encodeURIComponent(c)}>
+                  <span>{c}</span>
+                  <small>
+                    {courses.filter((course) => course.category === c).length}{" "}
+                    courses
+                  </small>
+                  <strong>→</strong>
+                </Link>
+              ))}
+            </div>
+          </section>
+        </>
+      )}
+      <section className="learning-promise">
+        <div>
+          <p className="eyebrow">More than watching a video</p>
+          <h2>Learn it. Try it. Make it yours.</h2>
+          <p>
+            Each course brings together a structured curriculum, companion
+            videos, clear explanations, and exercises. Mark lessons complete and
+            return to your last lesson whenever you're ready.
+          </p>
+        </div>
+        <div>
+          <h3>Have a skill to share?</h3>
+          <p>
+            Create a course, organise modules, and add YouTube videos or
+            playlists. Follow your learners' progress from your educator
+            dashboard.
+          </p>
+          <Link className="primary-button" to="/signup">
+            Become an educator →
+          </Link>
         </div>
       </section>
     </>
   );
 }
-
-// admins land on their dashboard, learners get theirs, visitors get the marketing page
-function Home() {
-  if (!isLoggedIn()) return <GuestHome />;
-  return getRole() === "ADMIN" ? <AdminDashboard /> : <StudentHome />;
+export default function Home() {
+  return isLoggedIn() ? <RoleDashboard /> : <GuestHome />;
 }
-
-export default Home;

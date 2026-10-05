@@ -97,6 +97,18 @@ async function seed() {
         );
       }
       const lessonIds = [];
+      if (existing?.demo_key) {
+        const { rows } = await client.query(
+          "SELECT l.id FROM lessons l JOIN sections s ON s.id=l.section_id WHERE s.course_id=$1 ORDER BY s.position,s.id,l.position,l.id",
+          [id],
+        );
+        courses.push({
+          id,
+          lessonIds: rows.map((l) => l.id),
+          title: existing.title,
+        });
+        continue;
+      }
       for (const [position, module] of item.modules.entries()) {
         let section = (
           await client.query(
@@ -158,6 +170,7 @@ async function seed() {
     const learners = accounts.filter((a) => a[0] === "LEARNER");
     for (const [learnerIndex, [, name, email]] of learners.entries()) {
       for (const [courseIndex, course] of courses.entries()) {
+        if (!course.lessonIds.length) continue;
         if (
           learnerIndex === 0
             ? ![0, 1, 2, 3, 6, 9].includes(courseIndex)

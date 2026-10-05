@@ -14,7 +14,7 @@ router.get("/dashboard/details", s.requireRole(), async (req, res) => {
   const args = role === "ADMIN" ? [] : [req.user.id];
   const [weekly, recent, categories, registrations] = await Promise.all([
     db.query(
-      `SELECT (p.completed_at AT TIME ZONE 'UTC')::date AS day,COUNT(*)::int AS lessons FROM lesson_progress p JOIN lessons l ON l.id=p.lesson_id JOIN sections s ON s.id=l.section_id JOIN courses c ON c.id=s.course_id WHERE ${filter} AND p.completed_at>=CURRENT_DATE-6 GROUP BY day ORDER BY day`,
+      `SELECT to_char(p.completed_at AT TIME ZONE 'UTC','YYYY-MM-DD') AS day,COUNT(*)::int AS lessons FROM lesson_progress p JOIN lessons l ON l.id=p.lesson_id JOIN sections s ON s.id=l.section_id JOIN courses c ON c.id=s.course_id WHERE ${filter} AND p.completed_at>=((NOW() AT TIME ZONE 'UTC')::date-6) AT TIME ZONE 'UTC' GROUP BY day ORDER BY day`,
       args,
     ),
     db.query(

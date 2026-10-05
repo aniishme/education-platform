@@ -13,9 +13,18 @@ function Courses() {
   // the search term lives in the URL (?q=) so the navbar search can set it
   const [searchParams, setSearchParams] = useSearchParams();
   const search = searchParams.get("q") ?? "";
-  const setSearch = (value) =>
-    setSearchParams(value ? { q: value } : {}, { replace: true });
-  const [category, setCategory] = useState("");
+  const setSearch = (value) => {
+    const next = new URLSearchParams(searchParams);
+    value ? next.set("q", value) : next.delete("q");
+    setSearchParams(next, { replace: true });
+  };
+  const category = searchParams.get("category") || "";
+  const setCategory = (value) => {
+    const next = new URLSearchParams(searchParams);
+    value ? next.set("category", value) : next.delete("category");
+    setSearchParams(next, { replace: true });
+  };
+  const [sort, setSort] = useState("popular");
   const [level, setLevel] = useState("");
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState("");
@@ -51,21 +60,36 @@ function Courses() {
     [courses],
   );
 
-  const filteredCourses = courses.filter((course) => {
-    const matchesSearch = course.title
-      .toLowerCase()
-      .includes(search.trim().toLowerCase());
-    const matchesCategory = !category || course.category === category;
-    const matchesLevel = !level || course.level === level;
+  const filteredCourses = courses
+    .filter((course) => {
+      const matchesSearch = (
+        course.title +
+        " " +
+        course.description +
+        " " +
+        course.category +
+        " " +
+        course.instructor
+      )
+        .toLowerCase()
+        .includes(search.trim().toLowerCase());
+      const matchesCategory = !category || course.category === category;
+      const matchesLevel = !level || course.level === level;
 
-    return matchesSearch && matchesCategory && matchesLevel;
-  });
+      return matchesSearch && matchesCategory && matchesLevel;
+    })
+    .sort((a, b) =>
+      sort === "popular"
+        ? b.enrolment_count - a.enrolment_count
+        : sort === "title"
+          ? a.title.localeCompare(b.title)
+          : new Date(b.created_at) - new Date(a.created_at),
+    );
 
   const hasFilters = Boolean(search || category || level);
 
   function clearFilters() {
-    setSearch("");
-    setCategory("");
+    setSearchParams({}, { replace: true });
     setLevel("");
   }
 
@@ -74,7 +98,28 @@ function Courses() {
       <div className="page-heading">
         <p className="eyebrow">Course catalogue</p>
         <h1 id="courses-heading">Explore Courses</h1>
-        <p>Find a course that matches your goals and current experience.</p>
+        <p>
+          Build practical skills with guided modules, video resources, worked
+          examples, and portfolio exercises. Every course is free to enrol.
+        </p>
+      </div>
+
+      <div className="category-tabs" aria-label="Browse categories">
+        <button
+          className={!category ? "active" : ""}
+          onClick={() => setCategory("")}
+        >
+          All topics
+        </button>
+        {categories.map((c) => (
+          <button
+            className={category === c ? "active" : ""}
+            key={c}
+            onClick={() => setCategory(c)}
+          >
+            {c}
+          </button>
+        ))}
       </div>
 
       <div className="course-filters">
@@ -101,6 +146,14 @@ function Courses() {
         >
           Clear filters
         </button>
+        <label className="sort-control">
+          Sort by
+          <select value={sort} onChange={(e) => setSort(e.target.value)}>
+            <option value="popular">Most enrolled</option>
+            <option value="recent">Newest</option>
+            <option value="title">Title A–Z</option>
+          </select>
+        </label>
       </div>
 
       {isLoading ? (
