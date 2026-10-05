@@ -1,11 +1,8 @@
+
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import logo from "../assets/studyflow-favicon.svg";
 import FormField from "../components/FormField";
-import { verifyPassword } from "../utils/password";
-
-const ADMIN_EMAIL = "admin@gmail.com";
-const ADMIN_PASSWORD = "admin123";
 
 function Login() {
   const [email, setEmail] = useState("");
@@ -13,7 +10,9 @@ function Login() {
   const [errors, setErrors] = useState({});
   const navigate = useNavigate();
 
-  const validateForm = async () => {
+  const handleSubmit = async (event) => {
+    event.preventDefault();
+
     const newErrors = {};
 
     if (!email.trim()) {
@@ -28,40 +27,58 @@ function Login() {
       newErrors.password = "Password must be at least 6 characters.";
     }
 
-    if (Object.keys(newErrors).length === 0) {
-      const normalizedEmail = email.trim().toLowerCase();
-      const isAdminLogin = normalizedEmail === ADMIN_EMAIL;
-      const credentialsValid = isAdminLogin
-        ? password === ADMIN_PASSWORD
-        : normalizedEmail === "student@gmail.com" && (await verifyPassword(password));
-
-      if (!credentialsValid) {
-        newErrors.credentials = "Invalid email or password.";
-      }
+    if (Object.keys(newErrors).length > 0) {
+      setErrors(newErrors);
+      return;
     }
 
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
-  };
+    try {
+      const response = await fetch(
+        "http://localhost:5000/api/auth/login",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            email: email.trim().toLowerCase(),
+            password,
+          }),
+        }
+      );
 
-  const handleSubmit = async (event) => {
-    event.preventDefault();
+      const data = await response.json();
 
-    if (await validateForm()) {
-      const normalizedEmail = email.trim().toLowerCase();
-      const isAdminLogin = normalizedEmail === ADMIN_EMAIL;
+      if (!response.ok) {
+        setErrors({
+          credentials: data.message || "Invalid email or password.",
+        });
+        return;
+      }
 
       localStorage.setItem(
         "studyflowAuth",
         JSON.stringify({
-          email: normalizedEmail,
+          email: data.user.email,
+          name: data.user.name,
+          userId: data.user.id,
+          role: data.user.role,
           isLoggedIn: true,
-          role: isAdminLogin ? "admin" : "student",
-        }),
+        })
       );
+
       navigate("/", { replace: true });
+
+    } catch (error) {
+      console.error("Login error:", error);
+
+      setErrors({
+        credentials:
+          "Unable to connect to the server. Please try again.",
+      });
     }
   };
+
   return (
     <div className="login-page">
       <div className="login-card">
@@ -75,34 +92,35 @@ function Login() {
         </p>
 
         <form onSubmit={handleSubmit} noValidate>
-        <FormField
-  label="Email"
-  id="email"
-  type="email"
-  placeholder="Enter your email"
-  value={email}
-  onChange={(event) => setEmail(event.target.value)}
-  error={errors.email}
-/>
+          <FormField
+            label="Email"
+            id="email"
+            type="email"
+            placeholder="Enter your email"
+            value={email}
+            onChange={(event) => setEmail(event.target.value)}
+            error={errors.email}
+          />
 
-   <FormField
+          <FormField
             label="Password"
             id="password"
             type="password"
             placeholder="Enter your password"
             value={password}
-            onChange={(event) =>
-              setPassword(event.target.value)
-            }
+            onChange={(event) => setPassword(event.target.value)}
             error={errors.password}
-          />    
+          />
 
           <button type="submit" className="login-button">
             Login
           </button>
 
           {errors.credentials && (
-            <p className="error-message login-form-error" role="alert">
+            <p
+              className="error-message login-form-error"
+              role="alert"
+            >
               {errors.credentials}
             </p>
           )}
@@ -117,3 +135,4 @@ function Login() {
 }
 
 export default Login;
+

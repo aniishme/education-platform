@@ -1,16 +1,17 @@
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import EmptyState from "../components/EmptyState";
 import FormField from "../components/FormField";
 import SortIcon from "./SortIcon";
 import { logActivity } from "../services/activityService";
-import { getUsers, setUserStatus, updateUser } from "../services/userService";
+import { getUsers, updateUser, updateUserStatus } from "../services/userService";
+import { getEnrolments } from "../services/enrolmentService";
 import { getInitials } from "../utils/profile";
 import useFocusTrap from "../utils/useFocusTrap";
 import "../Dashboard.css";
 import "../Admin.css";
 
-const roles = ["Student", "Admin"];
+const roles = ["student", "admin"];
 
 const columns = [
   { key: "name", label: "Name" },
@@ -21,11 +22,35 @@ const columns = [
 ];
 
 function ManageUsers() {
-  const [users, setUsers] = useState(getUsers);
+  const [users, setUsers] = useState([]);
+  useEffect(() => {
+    async function loadUsers() {
+      try {
+        const userData = await getUsers();
+        setUsers(userData);
+      } catch (error) {
+        console.error("Unable to load users:", error);
+      }
+    }
+
+    loadUsers();
+  }, []);
+  useEffect(() => {
+    async function loadEnrolments() {
+      try {
+        const enrolmentData = await getEnrolments();
+        setEnrolments(enrolmentData);
+      } catch (error) {
+        console.error("Unable to load enrolments:", error);
+      }
+    }
+
+    loadEnrolments();
+  }, []);
   const [searchParams, setSearchParams] = useSearchParams();
   const query = searchParams.get("q") ?? "";
   const [sort, setSort] = useState({ key: "name", direction: "asc" });
-
+  const [enrolments, setEnrolments] = useState([]);
   const [editingId, setEditingId] = useState(null);
   const [form, setForm] = useState({ name: "", email: "", role: roles[0] });
   const [errors, setErrors] = useState({});
@@ -33,7 +58,7 @@ function ManageUsers() {
 
   // admins manage their own account from Settings, not this table, so admin
   // accounts never show up here (nothing to accidentally deactivate/edit)
-  const manageableUsers = users.filter((user) => user.role !== "Admin");
+  const manageableUsers = users.filter((user) => user.role !== "admin");
 
   const filteredUsers = manageableUsers.filter((user) => {
     const term = query.trim().toLowerCase();
@@ -63,11 +88,26 @@ function ManageUsers() {
     );
   };
 
-  const toggleStatus = (user) => {
-    const nextStatus = user.status === "active" ? "deactivated" : "active";
-    setUserStatus(user.id, nextStatus);
-    setUsers(getUsers());
-    logActivity(`${user.name}'s account was ${nextStatus === "active" ? "reactivated" : "deactivated"}`);
+  const toggleStatus = async (user) => {
+    const nextStatus =
+      user.status === "active" ? "deactivated" : "active";
+
+    try {
+      const updatedUser = await updateUserStatus(user.id, nextStatus);
+
+      setUsers((currentUsers) =>
+        currentUsers.map((currentUser) =>
+          currentUser.id === updatedUser.id ? updatedUser : currentUser
+        )
+      );
+
+      logActivity(
+        `${updatedUser.name}'s account was ${nextStatus === "active" ? "reactivated" : "deactivated"
+        }`
+      );
+    } catch (error) {
+      console.error("Unable to update user status:", error);
+    }
   };
 
   const closeForm = () => {
@@ -87,23 +127,44 @@ function ManageUsers() {
     setForm((previous) => ({ ...previous, [field]: event.target.value }));
   };
 
-  const handleSubmit = (event) => {
+  const handleSubmit = async (event) => {
     event.preventDefault();
 
-    const newErrors = {};
-    if (!form.name.trim()) newErrors.name = "Enter a name.";
-    if (!form.email.trim()) newErrors.email = "Enter an email address.";
-    else if (!form.email.includes("@")) newErrors.email = "Enter a valid email address.";
+    const nextErrors = {};
 
-    if (Object.keys(newErrors).length > 0) {
-      setErrors(newErrors);
+    if (!form.name.trim()) {
+      nextErrors.name = "Name is required";
+    }
+
+    if (!form.email.trim()) {
+      nextErrors.email = "Email is required";
+    }
+
+    if (!form.role) {
+      nextErrors.role = "Role is required";
+    }
+
+    setErrors(nextErrors);
+
+    if (Object.keys(nextErrors).length > 0) {
       return;
     }
 
-    const user = updateUser(editingId, form);
-    logActivity(`${user.name}'s account details were updated`);
-    setUsers(getUsers());
-    closeForm();
+    try {
+      const user = await updateUser(editingId, form);
+
+      setUsers((currentUsers) =>
+        currentUsers.map((currentUser) =>
+          currentUser.id === user.id ? user : currentUser
+        )
+      );
+
+      logActivity(`${user.name}'s account details were updated`);
+
+      closeForm();
+    } catch (error) {
+      console.error("Unable to update user:", error);
+    }
   };
 
   return (
@@ -160,9 +221,15 @@ function ManageUsers() {
                   </th>
                   <td>{user.email}</td>
                   <td>
-                    <span className={`admin-role admin-role-${user.role.toLowerCase()}`}>{user.role}</span>
+                    <span className={`admin-role admin-role-${user.role}`}>
+                      {user.role === "admin" ? "Admin" : "Student"}
+                    </span>
                   </td>
-                  <td>{user.enrolledCourseIds?.length ?? 0}</td>
+                  <td>
+                    {enrolments.filter(
+                      (enrolment) => Number(enrolment.user_id) === Number(user.id)
+                    ).length}
+                  </td>
                   <td>
                     <span className={`admin-status admin-status-${user.status}`}>
                       {user.status === "active" ? "Active" : "Deactivated"}
@@ -232,7 +299,7 @@ function ManageUsers() {
                 <select id="user-role" value={form.role} onChange={updateField("role")}>
                   {roles.map((role) => (
                     <option key={role} value={role}>
-                      {role}
+                      {role === "admin" ? "Admin" : "Student"}
                     </option>
                   ))}
                 </select>

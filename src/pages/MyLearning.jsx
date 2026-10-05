@@ -1,14 +1,69 @@
+import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import courses from "../data/courses.json";
 import "../MyLearning.css";
-
-const enrolledCourses = [
-  { courseId: "react-fundamentals", progress: 72, status: "In progress" },
-  { courseId: "cybersecurity-essentials", progress: 38, status: "In progress" },
-  { courseId: "ui-ux-design-basics", progress: 100, status: "Completed" },
-];
+import { getEnrolments,  deleteEnrolment, } from "../services/enrolmentService";
+import { getCourses } from "../services/courseService";
+import { getAuth } from "../utils/auth";
 
 function MyLearning() {
+    const [enrolledCourses, setEnrolledCourses] = useState([]);
+  const [courses, setCourses] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    async function loadMyLearning() {
+      try {
+        const auth = getAuth();
+
+        if (!auth?.userId) {
+          setEnrolledCourses([]);
+          return;
+        }
+
+        const [enrolments, courseData] = await Promise.all([
+          getEnrolments(),
+          getCourses(),
+        ]);
+
+        const myEnrolments = enrolments.filter(
+          (enrolment) =>
+            Number(enrolment.user_id) === Number(auth.userId)
+        );
+
+        setEnrolledCourses(myEnrolments);
+        setCourses(courseData);
+      } catch (error) {
+        console.error("Unable to load My Learning:", error);
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    loadMyLearning();
+  }, []);
+
+  const handleLeaveCourse = async (enrolmentId) => {
+  const confirmed = window.confirm(
+    "Are you sure you want to leave this course?"
+  );
+
+  if (!confirmed) {
+    return;
+  }
+
+  try {
+    await deleteEnrolment(enrolmentId);
+
+    setEnrolledCourses((currentCourses) =>
+      currentCourses.filter(
+        (enrollment) => enrollment.id !== enrolmentId
+      )
+    );
+  } catch (error) {
+    console.error("Unable to leave course:", error);
+    alert("Unable to leave course. Please try again.");
+  }
+};
   return (
     <section className="learning-page" aria-labelledby="learning-title">
       <div className="learning-heading">
@@ -23,18 +78,20 @@ function MyLearning() {
           <span>Enrolled courses</span>
         </div>
         <div>
-          <strong>{enrolledCourses.filter((course) => course.progress === 100).length}</strong>
+         <strong>0</strong>
           <span>Completed</span>
         </div>
         <div>
-          <strong>67%</strong>
+          <strong>0%</strong>
           <span>Overall progress</span>
         </div>
       </div>
 
       <div className="learning-course-list">
         {enrolledCourses.map((enrollment) => {
-          const course = courses.find((item) => item.id === enrollment.courseId);
+         const course = courses.find(
+  (item) => Number(item.id) === Number(enrollment.course_id)
+);
 
           if (!course) {
             return null;
@@ -57,7 +114,7 @@ function MyLearning() {
               <div className="learning-course-progress">
                 <div className="learning-progress-heading">
                   <span>Course progress</span>
-                  <strong>{enrollment.progress}%</strong>
+                  <strong>0%</strong>
                 </div>
                 <div
                   className="learning-progress-track"
@@ -67,12 +124,19 @@ function MyLearning() {
                   aria-valuemax={100}
                   aria-valuenow={enrollment.progress}
                 >
-                  <span style={{ width: `${enrollment.progress}%` }} />
+                  <span style={{ width: "0%" }} />
                 </div>
                 <Link className="learning-continue-button" to={`/courses/${course.id}`}>
-                  {enrollment.progress === 100 ? "Review Course" : "Continue Learning"}
+                  {false ? "Review Course" : "Continue Learning"}
                   <span aria-hidden="true">→</span>
                 </Link>
+                <button
+  type="button"
+  className="learning-leave-button"
+  onClick={() => handleLeaveCourse(enrollment.id)}
+>
+  Leave Course
+</button>
               </div>
             </article>
           );

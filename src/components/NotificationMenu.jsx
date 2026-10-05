@@ -1,4 +1,4 @@
-import { useCallback, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import bellIcon from "../assets/notification.png";
 import { getRecentActivity, timeAgo } from "../services/activityService";
@@ -59,20 +59,38 @@ function NotificationMenu() {
   const readKey = isAdmin ? ADMIN_READ_KEY : READ_KEY;
 
   const [isOpen, setIsOpen] = useState(false);
-  const [readIds, setReadIds] = useState(() => getReadIds(readKey));
+const [readIds, setReadIds] = useState(() => getReadIds(readKey));
+const [activities, setActivities] = useState([]);
+
+useEffect(() => {
+  if (!isAdmin) return;
+
+  async function loadActivities() {
+    try {
+      const activityData = await getRecentActivity();
+      setActivities(activityData);
+    } catch (error) {
+      console.error("Unable to load activities:", error);
+    }
+  }
+
+  loadActivities();
+}, [isAdmin]);
   const [settings] = useSettings();
   const menuRef = useRef(null);
   const close = useCallback(() => setIsOpen(false), []);
   useDismiss(menuRef, isOpen, close);
 
-  const notifications = isAdmin
-    ? getRecentActivity().map((item) => ({
-        id: item.id,
-        title: item.message,
-        time: timeAgo(item.timestamp),
-        to: "/",
-      }))
-    : allNotifications.filter((item) => !item.type || settings.notifications[item.type]);
+ const notifications = isAdmin
+  ? activities.map((item) => ({
+      id: item.id,
+      title: item.message,
+      time: timeAgo(item.created_at),
+      to: "/",
+    }))
+  : allNotifications.filter(
+      (item) => !item.type || settings.notifications[item.type]
+    );
   const unreadCount = notifications.filter((item) => !readIds.includes(item.id)).length;
 
   const updateReadIds = (ids) => {
