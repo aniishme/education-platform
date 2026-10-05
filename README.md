@@ -144,7 +144,7 @@ npm.cmd exec playwright -- install chromium
 npm.cmd run test:e2e
 ```
 
-API tests start an ephemeral HTTP server, create uniquely named accounts/courses and clean up. They cover validation, authentication, RBAC, ownership, enrolment uniqueness, saved progress, deletion cascades and deactivation. Use a development database. Browser tests use demo accounts, create/delete a temporary course and verify management, authoring/publishing, learning persistence, forbidden routes and mobile layout. Stop manually running API/Vite servers before browser tests; the runner starts both. Demo passwords must remain unchanged for browser tests. Failed runs retain traces in gitignored `test-results/`.
+API tests start an ephemeral HTTP server, create uniquely named accounts/courses and clean up. They cover validation, authentication, RBAC, ownership, enrolment uniqueness, saved progress, deletion cascades and deactivation. Use a development database. Browser tests register both public roles, use demo accounts, create/delete a temporary course and verify management, authoring/publishing, learning persistence, forbidden routes and mobile layout. Test accounts are cleaned up. Stop manually running API/Vite servers before browser tests; the runner starts both. Demo passwords must remain unchanged for browser tests. Failed runs retain traces in gitignored `test-results/`.
 
 For a production-build preview, run `npm.cmd run preview` alongside the API and set `FRONTEND_ORIGIN=http://localhost:4173` in `Backend/.env`, then restart the backend. Deployment is outside this local MVP: a host would serve `dist/` and proxy `/api` to Express under the same HTTPS origin.
 

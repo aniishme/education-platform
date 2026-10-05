@@ -54,16 +54,22 @@ export default function RoleDashboard() {
                     </p>
                     <progress max="100" value={c.progress} />
                     <p>{c.progress}%</p>
-                    <Link
-                      className="primary-button"
-                      to={
-                        "/courses/" +
-                        c.course_id +
-                        (c.last_lesson_id ? "?lesson=" + c.last_lesson_id : "")
-                      }
-                    >
-                      Continue learning
-                    </Link>
+                    {c.status === "PUBLISHED" ? (
+                      <Link
+                        className="primary-button"
+                        to={
+                          "/courses/" +
+                          c.course_id +
+                          (c.last_lesson_id
+                            ? "?lesson=" + c.last_lesson_id
+                            : "")
+                        }
+                      >
+                        Continue learning
+                      </Link>
+                    ) : (
+                      <p>This course is temporarily unpublished.</p>
+                    )}
                   </article>
                 ))}
               </div>

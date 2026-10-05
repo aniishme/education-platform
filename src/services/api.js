@@ -12,7 +12,7 @@ export async function api(path, options = {}) {
     if (response.status === 401)
       window.dispatchEvent(new Event("studyflow-session-expired"));
     const error = new Error(data.message || "Unable to complete the request.");
-    error.status=response.status;
+    error.status = response.status;
     throw error;
   }
   return data;

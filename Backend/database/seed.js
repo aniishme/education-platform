@@ -1,7 +1,8 @@
 const bcrypt = require("bcrypt");
 const db = require("../db");
 async function seed() {
-  if(process.env.NODE_ENV==='production') throw new Error('Demo seeding is only allowed in development.');
+  if (process.env.NODE_ENV === "production")
+    throw new Error("Demo seeding is only allowed in development.");
   const client = await db.connect();
   try {
     await client.query("BEGIN");

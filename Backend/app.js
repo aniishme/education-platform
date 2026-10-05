@@ -8,10 +8,18 @@ const origin = process.env.FRONTEND_ORIGIN || "http://localhost:5173";
 app.disable("x-powered-by");
 app.use(cors({ origin, credentials: true }));
 app.use(express.json({ limit: "256kb" }));
-app.use((req,res,next)=>{
- if(req.body!==undefined && (req.body===null || typeof req.body!=='object' || Array.isArray(req.body))) return res.status(400).json({message:'Request body must be a JSON object.'});
- req.body ||= {};
- next();
+app.use((req, res, next) => {
+  if (
+    req.body !== undefined &&
+    (req.body === null ||
+      typeof req.body !== "object" ||
+      Array.isArray(req.body))
+  )
+    return res
+      .status(400)
+      .json({ message: "Request body must be a JSON object." });
+  req.body ||= {};
+  next();
 });
 app.use("/api", (req, res, next) => {
   if (
@@ -42,7 +50,8 @@ app.get("/api/dashboard", s.requireRole(), async (req, res) => {
   } else if (req.user.role === "EDUCATOR") {
     const { rows } = await db.query(
       `SELECT COUNT(*)::int AS courses,COUNT(*) FILTER(WHERE status='PUBLISHED')::int AS published,
-   (SELECT COUNT(*)::int FROM enrolments e JOIN courses c ON c.id=e.course_id WHERE c.educator_id=$1) AS enrolments FROM courses WHERE educator_id=$1`,
+   (SELECT COUNT(*)::int FROM enrolments e JOIN courses c ON c.id=e.course_id WHERE c.educator_id=$1) AS enrolments,
+   (SELECT COUNT(DISTINCT e.user_id)::int FROM enrolments e JOIN courses c ON c.id=e.course_id WHERE c.educator_id=$1) AS learners FROM courses WHERE educator_id=$1`,
       [req.user.id],
     );
     res.json(rows[0]);

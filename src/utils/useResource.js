@@ -1,7 +1,12 @@
 import { useEffect, useState } from "react";
 import { api } from "../services/api";
 export default function useResource(path) {
-  const [state, setState] = useState({ path, data: null, error: "", loading: true });
+  const [state, setState] = useState({
+    path,
+    data: null,
+    error: "",
+    loading: true,
+  });
   const [version, setVersion] = useState(0);
   useEffect(() => {
     let current = true;
@@ -17,5 +22,8 @@ export default function useResource(path) {
       current = false;
     };
   }, [path, version]);
-  return { ...(state.path===path?state:{data:null,error:'',loading:true}), reload: () => setVersion((v) => v + 1) };
+  return {
+    ...(state.path === path ? state : { data: null, error: "", loading: true }),
+    reload: () => setVersion((v) => v + 1),
+  };
 }

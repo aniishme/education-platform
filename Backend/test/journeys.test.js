@@ -35,17 +35,18 @@ async function register(call, role, label) {
   ).user;
 }
 before(async () => {
-  await db.query('SELECT 1');
+  await db.query("SELECT 1");
   server = app.listen(0, "127.0.0.1");
   await once(server, "listening");
   base = `http://127.0.0.1:${server.address().port}/api`;
 });
 after(async () => {
   try {
-    for (const id of courses) await db.query("DELETE FROM courses WHERE id=$1", [id]);
+    for (const id of courses)
+      await db.query("DELETE FROM courses WHERE id=$1", [id]);
     await db.query("DELETE FROM users WHERE email=ANY($1::text[])", [accounts]);
   } finally {
-    if(server) await new Promise((resolve) => server.close(resolve));
+    if (server) await new Promise((resolve) => server.close(resolve));
     await db.end();
   }
 });
@@ -210,7 +211,9 @@ test("educator CRUD, ownership, publishing, enrolment and persistent progress", 
     (await educator("/courses/" + course.id + "/learners"))[0].progress,
     50,
   );
-  assert.equal((await educator("/dashboard")).courses, 1);
+  const educatorStats = await educator("/dashboard");
+  assert.equal(educatorStats.courses, 1);
+  assert.equal(educatorStats.learners, 1);
   await learner("/lessons/" + second.id + "/progress", "PUT", {
     completed: true,
   });

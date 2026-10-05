@@ -1,4 +1,8 @@
 import { test, expect } from "@playwright/test";
+import db from "../Backend/db.js";
+test.afterAll(async () => {
+  await db.end();
+});
 async function login(page, email) {
   await page.goto("/login");
   await page.getByLabel("Email", { exact: true }).fill(email);
@@ -6,6 +10,57 @@ async function login(page, email) {
   await page.getByRole("button", { name: "Login", exact: true }).click();
   await expect(page.getByRole("heading", { name: /Welcome,/ })).toBeVisible();
 }
+test("public registration for educator and learner survives refresh and login", async ({
+  browser,
+}) => {
+  const emails = [];
+  try {
+    for (const role of ["EDUCATOR", "LEARNER"]) {
+      const context = await browser.newContext();
+      try {
+        const page = await context.newPage();
+        const email = `test-browser-${Date.now()}-${role.toLowerCase()}@example.com`;
+        emails.push(email);
+        await page.goto("/signup");
+        await page
+          .getByLabel("Full name", { exact: true })
+          .fill("Browser " + role);
+        await page.getByLabel("Email", { exact: true }).fill(email);
+        await page.getByLabel("Password", { exact: true }).fill("DemoPass123!");
+        await page
+          .getByLabel("Confirm password", { exact: true })
+          .fill("DemoPass123!");
+        await page
+          .getByRole("combobox", { name: "Account type", exact: true })
+          .selectOption(role);
+        await page
+          .getByRole("button", { name: "Create account", exact: true })
+          .click();
+        await expect(
+          page.getByRole("heading", { name: /Welcome,/ }),
+        ).toBeVisible();
+        await expect(
+          page.getByRole("link", {
+            name: role === "EDUCATOR" ? "My Courses" : "My Learning",
+            exact: true,
+          }),
+        ).toBeVisible();
+        await page.reload();
+        await expect(
+          page.getByRole("heading", { name: /Welcome,/ }),
+        ).toBeVisible();
+        await page.getByRole("button", { name: "Account menu" }).click();
+        await page.getByRole("button", { name: "Logout", exact: true }).click();
+        await expect(page).toHaveURL(/login/);
+        await login(page, email);
+      } finally {
+        await context.close();
+      }
+    }
+  } finally {
+    await db.query("DELETE FROM users WHERE email=ANY($1::text[])", [emails]);
+  }
+});
 test("admin dashboard, user roles, course management and refresh", async ({
   page,
 }) => {
@@ -14,11 +69,15 @@ test("admin dashboard, user roles, course management and refresh", async ({
   await page.reload();
   await expect(page.getByRole("heading", { name: /Welcome,/ })).toBeVisible();
   await page.getByRole("link", { name: "Manage Users", exact: true }).click();
-  await page.getByRole("combobox", { name: "Role", exact: true }).selectOption("EDUCATOR");
+  await page
+    .getByRole("combobox", { name: "Role", exact: true })
+    .selectOption("EDUCATOR");
   await expect(
     page.getByRole("cell", { name: "educator@example.com" }),
   ).toBeVisible();
-  await page.getByRole("combobox", { name: "Role", exact: true }).selectOption("LEARNER");
+  await page
+    .getByRole("combobox", { name: "Role", exact: true })
+    .selectOption("LEARNER");
   await expect(
     page.getByRole("cell", { name: "learner@example.com" }),
   ).toBeVisible();
@@ -72,7 +131,9 @@ test("educator creates modules and lessons, publishes, learner enrols and persis
     await expect(
       page.getByText("Browser lesson", { exact: true }),
     ).toBeVisible();
-    await page.getByRole("combobox", { name: "Status", exact: true }).selectOption("PUBLISHED");
+    await page
+      .getByRole("combobox", { name: "Status", exact: true })
+      .selectOption("PUBLISHED");
     await page
       .getByRole("button", { name: "Save course", exact: true })
       .click();
