@@ -522,13 +522,38 @@
   padding: 30px;
   width: min(540px, calc(100vw - 32px));
   max-height: 90dvh;
-  overflow-y: auto;
+  overflow: hidden;
   margin: auto;
   box-shadow: 0 30px 90px #0004;
 }
 .workspace-dialog::backdrop {
   background: #0b142b88;
   backdrop-filter: blur(4px);
+}
+.workspace-dialog[open] {
+  display: flex;
+  flex-direction: column;
+}
+.workspace-dialog > .dialog-heading,
+.workspace-dialog > .dialog-description {
+  flex-shrink: 0;
+}
+.workspace-dialog > .lms-form {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+}
+.dialog-fields {
+  display: grid;
+  gap: 16px;
+  overflow-y: auto;
+  min-height: 0;
+  padding: 4px;
+  margin: -4px;
+}
+.workspace-dialog .dialog-actions,
+.workspace-dialog .error-message {
+  flex-shrink: 0;
 }
 .dialog-heading {
   display: flex;

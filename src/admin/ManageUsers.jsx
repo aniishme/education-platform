@@ -311,67 +311,71 @@ function UserDialog({ initial, close, saved }) {
           : "Create an account and choose what this person can access."}
       </p>
       <form onSubmit={save} className="lms-form">
-        <label className="lms-field">
-          Full name
-          <input
-            autoFocus
-            required
-            maxLength={100}
-            autoComplete="name"
-            value={form.name}
-            onChange={(e) => setForm({ ...form, name: e.target.value })}
-          />
-        </label>
-        <label className="lms-field">
-          Email address
-          <input
-            type="email"
-            required
-            maxLength={150}
-            autoComplete="email"
-            value={form.email}
-            onChange={(e) => setForm({ ...form, email: e.target.value })}
-          />
-        </label>
-        <label className="lms-field">
-          User role
-          <select
-            value={form.role}
-            onChange={(e) => setForm({ ...form, role: e.target.value })}
-          >
-            {roles.map((r) => (
-              <option key={r} value={r}>
-                {r[0] + r.slice(1).toLowerCase()}
-              </option>
-            ))}
-          </select>
-        </label>
-        <p className="role-explanation">
-          {form.role === "ADMIN"
-            ? "Admins manage people, courses, and platform access."
-            : form.role === "EDUCATOR"
-              ? "Educators create courses and follow their learners’ progress."
-              : "Learners enrol in courses and save their learning progress."}
-        </p>
-        {!initial.id && (
-          <>
-            <label className="lms-field">
-              Initial password
-              <input
-                type="password"
-                required
-                minLength={8}
-                autoComplete="new-password"
-                value={form.password}
-                onChange={(e) => setForm({ ...form, password: e.target.value })}
-              />
-            </label>
-            <p className="helper-text">
-              At least 8 characters. Share this password with the user; they can
-              change it in account settings.
-            </p>
-          </>
-        )}
+        <div className="dialog-fields">
+          <label className="lms-field">
+            Full name
+            <input
+              autoFocus
+              required
+              maxLength={100}
+              autoComplete="name"
+              value={form.name}
+              onChange={(e) => setForm({ ...form, name: e.target.value })}
+            />
+          </label>
+          <label className="lms-field">
+            Email address
+            <input
+              type="email"
+              required
+              maxLength={150}
+              autoComplete="email"
+              value={form.email}
+              onChange={(e) => setForm({ ...form, email: e.target.value })}
+            />
+          </label>
+          <label className="lms-field">
+            User role
+            <select
+              value={form.role}
+              onChange={(e) => setForm({ ...form, role: e.target.value })}
+            >
+              {roles.map((r) => (
+                <option key={r} value={r}>
+                  {r[0] + r.slice(1).toLowerCase()}
+                </option>
+              ))}
+            </select>
+          </label>
+          <p className="role-explanation">
+            {form.role === "ADMIN"
+              ? "Admins manage people, courses, and platform access."
+              : form.role === "EDUCATOR"
+                ? "Educators create courses and follow their learners’ progress."
+                : "Learners enrol in courses and save their learning progress."}
+          </p>
+          {!initial.id && (
+            <>
+              <label className="lms-field">
+                Initial password
+                <input
+                  type="password"
+                  required
+                  minLength={8}
+                  autoComplete="new-password"
+                  value={form.password}
+                  onChange={(e) =>
+                    setForm({ ...form, password: e.target.value })
+                  }
+                />
+              </label>
+              <p className="helper-text">
+                At least 8 characters. Share this password with the user; they
+                can change it in account settings.
+              </p>
+            </>
+          )}
+        </div>
         {error && (
           <p role="alert" className="error-message">
             {error}
