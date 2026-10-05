@@ -1,0 +1,47 @@
+CREATE TABLE IF NOT EXISTS users (
+ id SERIAL PRIMARY KEY, name VARCHAR(100) NOT NULL,
+ email VARCHAR(150) NOT NULL UNIQUE, password TEXT NOT NULL,
+ role TEXT NOT NULL DEFAULT 'LEARNER' CHECK (role IN ('ADMIN','EDUCATOR','LEARNER')),
+ status TEXT NOT NULL DEFAULT 'active' CHECK (status IN ('active','deactivated')),
+ created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+CREATE TABLE IF NOT EXISTS sessions (
+ token_hash TEXT PRIMARY KEY, user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+ expires_at TIMESTAMPTZ NOT NULL
+);
+CREATE INDEX IF NOT EXISTS sessions_user_idx ON sessions(user_id);
+CREATE TABLE IF NOT EXISTS courses (
+ id SERIAL PRIMARY KEY, title VARCHAR(150) NOT NULL, description TEXT NOT NULL,
+ category VARCHAR(100) NOT NULL, educator_id INTEGER NOT NULL REFERENCES users(id),
+ level VARCHAR(50) NOT NULL DEFAULT 'Beginner', duration VARCHAR(50) NOT NULL DEFAULT '',
+ image TEXT NOT NULL DEFAULT '', status TEXT NOT NULL DEFAULT 'DRAFT' CHECK (status IN ('DRAFT','PUBLISHED')),
+ created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(), updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+CREATE INDEX IF NOT EXISTS courses_educator_idx ON courses(educator_id);
+CREATE TABLE IF NOT EXISTS sections (
+ id SERIAL PRIMARY KEY, course_id INTEGER NOT NULL REFERENCES courses(id) ON DELETE CASCADE,
+ title VARCHAR(150) NOT NULL, position INTEGER NOT NULL DEFAULT 0 CHECK (position >= 0)
+);
+CREATE INDEX IF NOT EXISTS sections_course_idx ON sections(course_id);
+CREATE TABLE IF NOT EXISTS lessons (
+ id SERIAL PRIMARY KEY, section_id INTEGER NOT NULL REFERENCES sections(id) ON DELETE CASCADE,
+ title VARCHAR(150) NOT NULL, description TEXT NOT NULL DEFAULT '', content TEXT NOT NULL DEFAULT '',
+ video_url TEXT NOT NULL DEFAULT '', position INTEGER NOT NULL DEFAULT 0 CHECK (position >= 0)
+);
+CREATE INDEX IF NOT EXISTS lessons_section_idx ON lessons(section_id);
+CREATE TABLE IF NOT EXISTS enrolments (
+ id SERIAL PRIMARY KEY, user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+ course_id INTEGER NOT NULL REFERENCES courses(id) ON DELETE CASCADE,
+ enrolled_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+ last_lesson_id INTEGER REFERENCES lessons(id) ON DELETE SET NULL,
+ last_accessed_at TIMESTAMPTZ, UNIQUE(user_id, course_id)
+);
+CREATE INDEX IF NOT EXISTS enrolments_course_idx ON enrolments(course_id);
+CREATE TABLE IF NOT EXISTS lesson_progress (
+ user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+ lesson_id INTEGER NOT NULL REFERENCES lessons(id) ON DELETE CASCADE,
+ completed_at TIMESTAMPTZ NOT NULL DEFAULT NOW(), PRIMARY KEY(user_id, lesson_id)
+);
+CREATE TABLE IF NOT EXISTS activity (
+ id SERIAL PRIMARY KEY, message VARCHAR(255) NOT NULL, created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
