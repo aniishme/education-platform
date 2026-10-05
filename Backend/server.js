@@ -1,5 +1,6 @@
 const express = require("express");
 const cors = require("cors");
+const rateLimit = require("express-rate-limit");
 const db = require("./db");
 const authRoutes = require("./routes/authRoutes");
 const courseRoutes = require("./routes/courseRoutes");
@@ -14,6 +15,13 @@ const PORT = 5000;
 // Middleware
 app.use(cors());
 app.use(express.json());
+
+const apiLimiter = rateLimit({
+    windowMs: 15 * 60 * 1000,
+    limit: 300
+});
+
+app.use("/api", apiLimiter);
 
 app.use("/api/auth", authRoutes);
 app.use("/api/courses", courseRoutes);
@@ -45,7 +53,7 @@ app.get("/api/test-db", async (req, res) => {
         });
     }
 });
-
 app.listen(PORT, () => {
+    console.log(`Server running on http://localhost:${PORT}`);
     console.log(`Server running on http://localhost:${PORT}`);
 });
