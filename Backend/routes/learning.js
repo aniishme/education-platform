@@ -3,6 +3,27 @@ const db = require("../db");
 const s = require("../security");
 const access = require("../courseAccess");
 const { progress } = require("./courses");
+router.get("/learning/progress", s.requireRole("LEARNER"), async (req, res) => {
+  const [activity, history, modules] = await Promise.all([
+    db.query(
+      `SELECT to_char(p.completed_at AT TIME ZONE 'UTC','YYYY-MM-DD') AS day,COUNT(*)::int AS lessons FROM lesson_progress p JOIN lessons l ON l.id=p.lesson_id JOIN sections s ON s.id=l.section_id JOIN enrolments e ON e.course_id=s.course_id AND e.user_id=p.user_id WHERE p.user_id=$1 AND p.completed_at>=((NOW() AT TIME ZONE 'UTC')::date-27) AT TIME ZONE 'UTC' GROUP BY day ORDER BY day`,
+      [req.user.id],
+    ),
+    db.query(
+      `SELECT p.lesson_id,l.title,c.title AS course_title,c.id AS course_id,p.completed_at FROM lesson_progress p JOIN lessons l ON l.id=p.lesson_id JOIN sections s ON s.id=l.section_id JOIN courses c ON c.id=s.course_id JOIN enrolments e ON e.course_id=c.id AND e.user_id=p.user_id WHERE p.user_id=$1 ORDER BY p.completed_at DESC,p.lesson_id LIMIT 12`,
+      [req.user.id],
+    ),
+    db.query(
+      `SELECT s.id,s.title,s.course_id,COUNT(l.id)::int AS total_lessons,COUNT(p.lesson_id)::int AS completed_lessons FROM sections s JOIN enrolments e ON e.course_id=s.course_id AND e.user_id=$1 LEFT JOIN lessons l ON l.section_id=s.id LEFT JOIN lesson_progress p ON p.lesson_id=l.id AND p.user_id=e.user_id GROUP BY s.id ORDER BY s.course_id,s.position,s.id`,
+      [req.user.id],
+    ),
+  ]);
+  res.json({
+    activity: activity.rows,
+    history: history.rows,
+    modules: modules.rows.map(progress),
+  });
+});
 router.get("/enrolments", s.requireRole(), async (req, res) => {
   const args = [];
   let filter = "";

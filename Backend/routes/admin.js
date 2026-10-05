@@ -1,7 +1,22 @@
 const router = require("express").Router();
 const db = require("../db");
 const s = require("../security");
+const bcrypt = require("bcrypt");
 router.use(s.requireRole("ADMIN"));
+router.post("/users", async (req, res) => {
+  const name = s.text(req.body.name, "Name", 100),
+    email = s.email(req.body.email);
+  const password = s.password(req.body.password),
+    role = req.body.role;
+  if (!["ADMIN", "EDUCATOR", "LEARNER"].includes(role))
+    s.fail(400, "Choose a valid user role.");
+  const hashed = await bcrypt.hash(password, 12);
+  const { rows } = await db.query(
+    "INSERT INTO users(name,email,password,role) VALUES($1,$2,$3,$4) RETURNING id,name,email,role,status,created_at",
+    [name, email, hashed, role],
+  );
+  res.status(201).json({ user: rows[0] });
+});
 router.get("/users", async (req, res) => {
   res.json(
     (

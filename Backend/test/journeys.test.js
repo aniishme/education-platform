@@ -121,6 +121,10 @@ test("educator CRUD, ownership, publishing, enrolment and persistent progress", 
   const student = await register(learner, "LEARNER", "learner");
   await guest("/dashboard/details", "GET", undefined, 401);
   await learner("/users", "GET", undefined, 403);
+  await learner("/users", "POST", { name: "Denied" }, 403);
+  await educator("/users", "POST", { name: "Denied" }, 403);
+  await guest("/users", "POST", {}, 401);
+  await educator("/learning/progress", "GET", undefined, 403);
   await educator("/users", "GET", undefined, 403);
   await learner("/courses", "POST", { title: "Forbidden" }, 403);
   await guest("/courses", "POST", {}, 401);
@@ -237,6 +241,19 @@ test("educator CRUD, ownership, publishing, enrolment and persistent progress", 
   assert.equal(enrolled[0].progress, 50);
   assert.equal(enrolled[0].user_id, student.id);
   assert.equal(enrolled[0].last_lesson_id, first.id);
+  const analytics = await learner("/learning/progress");
+  assert.equal(analytics.modules[0].progress, 50);
+  assert.equal(analytics.history.length, 1);
+  assert.equal(
+    analytics.activity.reduce((n, d) => n + d.lessons, 0),
+    1,
+  );
+  assert.equal((await otherStudentProgress()).history.length, 0);
+  async function otherStudentProgress() {
+    const isolated = client();
+    await register(isolated, "LEARNER", "isolated-progress");
+    return isolated("/learning/progress");
+  }
   const insight = await learner("/dashboard/details");
   assert.equal(insight.recent.length, 1);
   assert.equal(insight.recent[0].title, "Updated first");
@@ -363,6 +380,58 @@ test("admin users, statistics, status and session revocation", async () => {
     password: "JourneyPass123!",
   });
   const self = (await admin("/auth/me")).user;
+  for (const role of ["LEARNER", "EDUCATOR", "ADMIN"]) {
+    const addedEmail = `test-${tag}-admin-created-${role.toLowerCase()}@example.com`;
+    accounts.push(addedEmail);
+    const created = await admin(
+      "/users",
+      "POST",
+      {
+        name: "Added " + role,
+        email: addedEmail.toUpperCase(),
+        password: "CreatedPass123!",
+        role,
+      },
+      201,
+    );
+    assert.equal(created.user.role, role);
+    assert.equal(created.user.email, addedEmail);
+    assert.ok(!created.user.password);
+    const stored = (
+      await db.query("SELECT password FROM users WHERE id=$1", [
+        created.user.id,
+      ])
+    ).rows[0];
+    assert.notEqual(stored.password, "CreatedPass123!");
+    const added = client();
+    await added("/auth/login", "POST", {
+      email: addedEmail,
+      password: "CreatedPass123!",
+    });
+    assert.equal((await added("/auth/me")).user.role, role);
+    assert.equal((await admin("/auth/me")).user.id, self.id);
+    await admin(
+      "/users",
+      "POST",
+      {
+        name: "Duplicate",
+        email: addedEmail,
+        password: "CreatedPass123!",
+        role,
+      },
+      409,
+    );
+  }
+  for (const invalid of [
+    { name: "", email: "bad", password: "short", role: "LEARNER" },
+    {
+      name: "Bad role",
+      email: "valid@example.com",
+      password: "CreatedPass123!",
+      role: "OTHER",
+    },
+  ])
+    await admin("/users", "POST", invalid, 400);
   await admin(
     "/users/" + self.id + "/status",
     "PUT",
